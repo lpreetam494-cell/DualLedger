@@ -31,7 +31,10 @@ export default function Expenses() {
   }, [fetchExpenses]);
 
   const handleSaveExpense = async () => {
-    if (!amount || amount === '0.00' || !description) return;
+    if (!amount || amount === '0.00' || !description) {
+      alert('Please enter a valid amount and description.');
+      return;
+    }
     
     const success = await addExpense({
       amount: parseFloat(amount),
@@ -44,6 +47,8 @@ export default function Expenses() {
     if (success) {
       setAmount('0.00');
       setDescription('');
+    } else {
+      alert('Failed to save expense. Please verify your fields or check if you are logged in.');
     }
   };
 
@@ -135,13 +140,34 @@ export default function Expenses() {
             </div>
             
             <div className="flex gap-3">
-              <div className="flex-1 flex items-center justify-between bg-[#1A2130] p-4 rounded-xl">
-                <span className="text-sm font-medium text-gray-200">{category}</span>
-                <ChevronDown size={18} className="text-gray-500" />
+              <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
+                <select 
+                  value={category} 
+                  onChange={(e) => setCategory(e.target.value)} 
+                  className="w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+                >
+                  <option value="Food & Dining">Food & Dining</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Groceries">Groceries</option>
+                  <option value="Housing">Housing</option>
+                  <option value="Entertainment">Entertainment</option>
+                </select>
+                <span className="text-sm font-medium text-gray-200 truncate pr-2">{category}</span>
+                <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
               </div>
-              <div className="flex-1 flex items-center justify-between bg-[#1A2130] p-4 rounded-xl">
-                <span className="text-sm font-medium text-gray-200">{paymentMode}</span>
-                <ChevronDown size={18} className="text-gray-500" />
+              <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
+                <select 
+                  value={paymentMode} 
+                  onChange={(e) => setPaymentMode(e.target.value)} 
+                  className="w-full h-full absolute inset-0 opacity-0 cursor-pointer"
+                >
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Debit Card">Debit Card</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+                <span className="text-sm font-medium text-gray-200 truncate pr-2">{paymentMode}</span>
+                <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
               </div>
             </div>
           </div>

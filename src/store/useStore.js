@@ -17,6 +17,9 @@ export const useStore = create((set) => ({
   error: null,
   theme: localStorage.getItem('theme') || 'light',
   currency: JSON.parse(localStorage.getItem('currency')) || { label: 'USD ($)', symbol: '$' },
+  isNotificationsOpen: false,
+
+  toggleNotifications: () => set((state) => ({ isNotificationsOpen: !state.isNotificationsOpen })),
 
   toggleTheme: () => set((state) => {
     const newTheme = state.theme === 'light' ? 'dark' : 'light';
