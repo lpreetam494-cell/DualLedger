@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Layers, CreditCard, Utensils, CarFront, ShoppingCart, Pencil, ChevronDown, CircleAlert, Building2 } from 'lucide-react';
+import { Calendar, Layers, CreditCard, Utensils, CarFront, ShoppingCart, Pencil, ChevronDown, CircleAlert, Building2, Plus } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
@@ -20,12 +20,16 @@ const getCategoryIcon = (category) => {
 };
 
 export default function Transactions() {
-  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences } = useStore();
+  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences, fetchSplitBalances } = useStore();
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('0.00');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
+  
+  const [isSplit, setIsSplit] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [newParticipant, setNewParticipant] = useState('');
 
   const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'];
   const defaultIncomeCategories = ['Salary', 'Freelance', 'Investments', 'Gift'];
@@ -89,24 +93,62 @@ export default function Transactions() {
     }
   };
 
+  const handleAddParticipant = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      e.preventDefault();
+      if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
+        setParticipants([...participants, newParticipant.trim()]);
+        setNewParticipant('');
+      }
+    }
+  };
+
+  const removeParticipant = (name) => {
+    setParticipants(participants.filter(p => p !== name));
+  };
+
   const handleSaveExpense = async () => {
     if (!amount || amount === '0.00' || !description) {
       alert('Please enter a valid amount and description.');
       return;
     }
+
+    if (isSplit && participants.length === 0) {
+      alert('Please add at least one friend to split with.');
+      return;
+    }
     
+    let splitDetails = [];
+    if (isSplit) {
+      const totalAmount = parseFloat(amount);
+      const splitCount = participants.length + 1; // Participants + You
+      const splitAmount = totalAmount / splitCount;
+
+      splitDetails = participants.map(name => ({
+        userId: name,
+        amountOwed: splitAmount
+      }));
+    }
+
     const success = await addExpense({
       type,
       amount: parseFloat(amount),
       description,
       category,
       paymentMode,
-      isSplit: false
+      isSplit: isSplit,
+      splitDetails: isSplit ? splitDetails : []
     });
 
     if (success) {
       setAmount('0.00');
       setDescription('');
+      setParticipants([]);
+      setIsSplit(false);
+      setNewParticipant('');
+      if (isSplit) {
+        fetchSplitBalances();
+      }
     } else {
       alert('Failed to save expense. Please verify your fields or check if you are logged in.');
     }
@@ -216,6 +258,52 @@ export default function Transactions() {
               />
             </div>
             
+            {type === 'expense' && (
+              <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-1">
+                <input 
+                  type="checkbox" 
+                  checked={isSplit} 
+                  onChange={(e) => setIsSplit(e.target.checked)}
+                  className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary focus:ring-offset-gray-900"
+                />
+                Split this expense with friends
+              </label>
+            )}
+
+            {isSplit && type === 'expense' && (
+              <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
+                <label className="text-xs font-semibold text-gray-400 block">Involved ({participants.length + 1})</label>
+                
+                <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-[#0B101B] focus-within:border-primary transition-colors">
+                  <input 
+                    type="text" 
+                    value={newParticipant}
+                    onChange={(e) => setNewParticipant(e.target.value)}
+                    onKeyDown={handleAddParticipant}
+                    placeholder="Add friend's name... (Press Enter)"
+                    className="w-full text-sm outline-none bg-transparent text-white placeholder-gray-600"
+                  />
+                  <button onClick={handleAddParticipant} className="p-1 text-primary rounded outline-none w-6 h-6 flex items-center justify-center hover:bg-gray-800">
+                    <Plus size={16} />
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
+                    <span className="text-xs font-medium">You</span>
+                  </div>
+                  {participants.map((p, i) => (
+                    <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-full group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10 transition-colors">
+                      <span className="text-xs font-medium text-gray-300">{p}</span>
+                      <button onClick={() => removeParticipant(p)} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
                 <select 

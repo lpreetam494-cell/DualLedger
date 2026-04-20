@@ -4,9 +4,17 @@ import { Bell, Utensils, CarFront, ShoppingBag, Home as HomeIcon, Building2, Lay
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useStore } from '../store/useStore';
 
+const currencies = [
+  { label: 'USD', symbol: '$' },
+  { label: 'EUR', symbol: '€' },
+  { label: 'GBP', symbol: '£' },
+  { label: 'INR', symbol: '₹' },
+  { label: 'JPY', symbol: '¥' },
+];
+
 export default function Home() {
   const navigate = useNavigate();
-  const { insights, fetchInsights, loading, currency, toggleNotifications } = useStore();
+  const { insights, fetchInsights, loading, currency, setCurrency, toggleNotifications } = useStore();
 
   useEffect(() => {
     fetchInsights();
@@ -14,6 +22,7 @@ export default function Home() {
 
   const totalSpent = insights?.totalSpent || 0;
   const currentBalance = insights?.currentBalance || 0;
+  const totalIncome = totalSpent + currentBalance;
   const categories = insights?.categories || [];
   const dayTrends = insights?.dayTrends || [];
 
@@ -39,21 +48,29 @@ export default function Home() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
-          <h1 className="text-xl font-bold">DualLedger</h1>
+          <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm" />
+          <h1 className="text-xl font-bold dark:text-white">DualLedger</h1>
         </div>
-        <button onClick={toggleNotifications} className="p-2 bg-white rounded-full shadow-sm">
-          <Bell size={20} className="text-gray-800" />
-        </button>
+        <div className="flex items-center gap-2">
+          <select 
+            value={currency.label} 
+            onChange={(e) => {
+              const selected = currencies.find(c => c.label === e.target.value);
+              if (selected) setCurrency(selected);
+            }}
+            className="bg-gray-100 dark:bg-gray-800 text-xs font-semibold px-2 py-1.5 rounded-lg outline-none cursor-pointer dark:text-white border-r-4 border-transparent"
+          >
+            {currencies.map(c => <option key={c.label} value={c.label}>{c.label} ({c.symbol})</option>)}
+          </select>
+          <button onClick={toggleNotifications} className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm">
+            <Bell size={20} className="text-gray-800 dark:text-white" />
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white p-6 rounded-[2rem] shadow-soft">
+      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-soft">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Balance</p>
-        <h2 className="text-4xl font-extrabold tracking-tight mb-2">{currency.symbol}{currentBalance.toFixed(2)}</h2>
-        <div className="flex items-center gap-2 mb-6">
-          <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-md">+2.4%</span>
-          <span className="text-xs text-gray-500">vs last month</span>
-        </div>
+        <h2 className="text-4xl font-extrabold tracking-tight mb-6 dark:text-white">{currency.symbol}{currentBalance.toFixed(2)}</h2>
         <div className="flex gap-3">
           <button 
             onClick={() => navigate('/transactions')}
@@ -71,26 +88,26 @@ export default function Home() {
       </div>
 
       <div className="flex gap-4">
-        <div className="flex-1 bg-gray-100 p-5 rounded-3xl">
+        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-3xl">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Monthly Spending</p>
-          <h3 className="text-xl font-bold mb-4">{currency.symbol}{totalSpent.toFixed(2)}</h3>
-          <div className="w-full bg-gray-200 rounded-full h-1 mb-2">
-            <div className="bg-black h-1 rounded-full w-[65%]"></div>
+          <h3 className="text-xl font-bold mb-4 dark:text-white">{currency.symbol}{totalSpent.toFixed(2)}</h3>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mb-2">
+            <div className="bg-black dark:bg-primary h-1 rounded-full w-[65%]"></div>
           </div>
           <p className="text-[10px] text-gray-500 text-right">Current cycle</p>
         </div>
 
-        <div className="flex-1 bg-gray-100 p-5 rounded-3xl">
-          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Savings</p>
-          <h3 className="text-xl font-bold mb-2">{currency.symbol}32,100.00</h3>
-          <p className="text-[10px] text-gray-500">+ {currency.symbol}1,200 this month</p>
+        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-3xl">
+          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Income</p>
+          <h3 className="text-xl font-bold mb-2 dark:text-white">{currency.symbol}{totalIncome.toFixed(2)}</h3>
+          <p className="text-[10px] text-gray-500">All time</p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-3xl shadow-soft">
+      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-3xl shadow-soft">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="font-bold">Spending Trends</h3>
+            <h3 className="font-bold dark:text-white">Spending Trends</h3>
             <p className="text-xs text-gray-500">By Day</p>
           </div>
         </div>
@@ -111,7 +128,7 @@ export default function Home() {
       </div>
 
       <div>
-        <h3 className="font-bold mb-4">Categories</h3>
+        <h3 className="font-bold mb-4 dark:text-white">Categories</h3>
         <div className="space-y-3">
           {categories.slice(0, 4).map((cat) => (
             <CategoryItem 
@@ -133,15 +150,15 @@ function CategoryItem({ icon: Icon, title, subtitle, amount }) {
   return (
     <div className="flex items-center justify-between p-2">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
-          <Icon size={20} className="text-gray-800" />
+        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+          <Icon size={20} className="text-gray-800 dark:text-gray-200" />
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h4>
           <p className="text-[10px] text-gray-500">{subtitle}</p>
         </div>
       </div>
-      <span className="text-sm font-bold text-gray-900">{amount}</span>
+      <span className="text-sm font-bold text-gray-900 dark:text-white">{amount}</span>
     </div>
   );
 }
