@@ -107,5 +107,18 @@ export const useStore = create((set) => ({
     } catch (error) {
       set({ error: error.message, loading: false });
     }
+  },
+
+  updatePreferences: async (newPreferences) => {
+    try {
+      const response = await axios.put(`${API_URL}/auth/preferences`, newPreferences);
+      const userData = response.data;
+      localStorage.setItem('user', JSON.stringify(userData));
+      set({ user: userData });
+      return true;
+    } catch (error) {
+      console.error("Failed to update preferences:", error);
+      return false;
+    }
   }
 }));

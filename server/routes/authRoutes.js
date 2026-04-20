@@ -32,6 +32,7 @@ router.post('/register', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        preferences: user.preferences,
         token: generateToken(user._id),
       });
     } else {
@@ -54,6 +55,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        preferences: user.preferences,
         token: generateToken(user._id),
       });
     } else {
@@ -74,6 +76,35 @@ router.get('/profile', protect, async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        preferences: user.preferences,
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update User Preferences
+router.put('/preferences', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      if (!user.preferences) user.preferences = {};
+      if (req.body.expenseCategories) user.preferences.expenseCategories = req.body.expenseCategories;
+      if (req.body.incomeCategories) user.preferences.incomeCategories = req.body.incomeCategories;
+      if (req.body.paymentModes) user.preferences.paymentModes = req.body.paymentModes;
+
+      const updatedUser = await user.save();
+      
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        preferences: updatedUser.preferences,
+        token: generateToken(updatedUser._id),
       });
     } else {
       res.status(404).json({ message: 'User not found' });

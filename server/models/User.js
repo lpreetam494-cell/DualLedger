@@ -15,6 +15,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  preferences: {
+    expenseCategories: { 
+      type: [String], 
+      default: ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'] 
+    },
+    incomeCategories: { 
+      type: [String], 
+      default: ['Salary', 'Freelance', 'Investments', 'Gift'] 
+    },
+    paymentModes: { 
+      type: [String], 
+      default: ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'UPI'] 
+    }
+  }
 }, {
   timestamps: true,
 });
@@ -25,9 +39,9 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Encrypt password using bcrypt before saving
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    next();
+    return;
   }
 
   const salt = await bcrypt.genSalt(10);

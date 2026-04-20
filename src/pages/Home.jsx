@@ -56,10 +56,10 @@ export default function Home() {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => navigate('/expenses')}
+            onClick={() => navigate('/transactions')}
             className="flex-1 bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition"
           >
-            Add<br />Expense
+            Add<br />Transaction
           </button>
           <button 
             onClick={() => navigate('/split')}

@@ -19,17 +19,75 @@ const getCategoryIcon = (category) => {
   }
 };
 
-export default function Expenses() {
-  const { expenses, fetchExpenses, addExpense, loading, currency } = useStore();
+export default function Transactions() {
+  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences } = useStore();
   const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('0.00');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Food & Dining');
-  const [paymentMode, setPaymentMode] = useState('Credit Card');
+  const [category, setCategory] = useState('');
+  const [paymentMode, setPaymentMode] = useState('');
+
+  const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'];
+  const defaultIncomeCategories = ['Salary', 'Freelance', 'Investments', 'Gift'];
+  const defaultPaymentModes = ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer'];
+
+  const expenseCategories = user?.preferences?.expenseCategories || defaultExpenseCategories;
+  const incomeCategories = user?.preferences?.incomeCategories || defaultIncomeCategories;
+  const paymentModes = user?.preferences?.paymentModes || defaultPaymentModes;
+
+  const currentCategories = type === 'expense' ? expenseCategories : incomeCategories;
+
+  useEffect(() => {
+    if (currentCategories.length > 0 && !currentCategories.includes(category)) {
+      setCategory(currentCategories[0]);
+    }
+  }, [type, user?.preferences?.expenseCategories, user?.preferences?.incomeCategories]);
+
+  useEffect(() => {
+    if (paymentModes.length > 0 && !paymentModes.includes(paymentMode)) {
+      setPaymentMode(paymentModes[0]);
+    }
+  }, [user?.preferences?.paymentModes]);
 
   useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
+
+  const handleCategoryChange = async (e) => {
+    const val = e.target.value;
+    if (val === 'ADD_NEW') {
+      const newCat = prompt("Enter new category name:");
+      if (newCat && newCat.trim()) {
+        const catList = type === 'expense' ? expenseCategories : incomeCategories;
+        const key = type === 'expense' ? 'expenseCategories' : 'incomeCategories';
+        if (!catList.includes(newCat.trim())) {
+          await updatePreferences({ [key]: [...catList, newCat.trim()] });
+        }
+        setCategory(newCat.trim());
+      } else {
+        setCategory(currentCategories[0]);
+      }
+    } else {
+      setCategory(val);
+    }
+  };
+
+  const handlePaymentChange = async (e) => {
+    const val = e.target.value;
+    if (val === 'ADD_NEW') {
+      const newMode = prompt("Enter new payment mode:");
+      if (newMode && newMode.trim()) {
+        if (!paymentModes.includes(newMode.trim())) {
+          await updatePreferences({ paymentModes: [...paymentModes, newMode.trim()] });
+        }
+        setPaymentMode(newMode.trim());
+      } else {
+        setPaymentMode(paymentModes[0]);
+      }
+    } else {
+      setPaymentMode(val);
+    }
+  };
 
   const handleSaveExpense = async () => {
     if (!amount || amount === '0.00' || !description) {
@@ -71,8 +129,8 @@ export default function Expenses() {
   return (
     <div className="min-h-screen pb-[400px]">
       <div className="p-6">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Expenses</h1>
-        <p className="text-sm text-gray-600 mb-6">Track and manage your daily outflow.</p>
+        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Transactions</h1>
+        <p className="text-sm text-gray-600 mb-6">Track and manage your daily outflow and income.</p>
 
         <div className="flex gap-2 mb-8">
           <button className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl shadow-sm text-xs font-semibold text-gray-700 border border-gray-100">
@@ -109,7 +167,7 @@ export default function Expenses() {
             ))}
             
             {expenses.length === 0 && !loading && (
-              <div className="text-center text-gray-500 text-sm py-10">No expenses found. Add one below!</div>
+              <div className="text-center text-gray-500 text-sm py-10">No transactions found. Add one below!</div>
             )}
           </div>
         )}
@@ -162,14 +220,11 @@ export default function Expenses() {
               <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
                 <select 
                   value={category} 
-                  onChange={(e) => setCategory(e.target.value)} 
+                  onChange={handleCategoryChange} 
                   className="w-full h-full absolute inset-0 opacity-0 cursor-pointer"
                 >
-                  <option value="Food & Dining">Food & Dining</option>
-                  <option value="Transportation">Transportation</option>
-                  <option value="Groceries">Groceries</option>
-                  <option value="Housing">Housing</option>
-                  <option value="Entertainment">Entertainment</option>
+                  {currentCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  <option value="ADD_NEW">+ Add New...</option>
                 </select>
                 <span className="text-sm font-medium text-gray-200 truncate pr-2">{category}</span>
                 <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
@@ -177,13 +232,11 @@ export default function Expenses() {
               <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
                 <select 
                   value={paymentMode} 
-                  onChange={(e) => setPaymentMode(e.target.value)} 
+                  onChange={handlePaymentChange} 
                   className="w-full h-full absolute inset-0 opacity-0 cursor-pointer"
                 >
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Debit Card">Debit Card</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
+                  {paymentModes.map(mode => <option key={mode} value={mode}>{mode}</option>)}
+                  <option value="ADD_NEW">+ Add New...</option>
                 </select>
                 <span className="text-sm font-medium text-gray-200 truncate pr-2">{paymentMode}</span>
                 <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />

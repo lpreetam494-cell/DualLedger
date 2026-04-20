@@ -10,7 +10,7 @@ export function cn(...inputs) {
 
 const navItems = [
   { path: '/', label: 'HOME', icon: Home },
-  { path: '/expenses', label: 'EXPENSES', icon: ReceiptText },
+  { path: '/transactions', label: 'TXNS', icon: ReceiptText },
   { path: '/split', label: 'SPLIT', icon: Users },
   { path: '/insights', label: 'INSIGHTS', icon: TrendingUp },
   { path: '/profile', label: 'PROFILE', icon: User },
