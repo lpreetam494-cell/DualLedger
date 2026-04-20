@@ -4,8 +4,15 @@ import Expense from '../models/Expense.js';
 // @route   GET /api/splits/balances
 export const getSplitBalances = async (req, res) => {
   try {
-    // Find all split expenses
-    const expenses = await Expense.find({ isSplit: true });
+    // Find all split expenses (for isolation, only where user is involved)
+    const expenses = await Expense.find({ 
+      isSplit: true, 
+      $or: [
+        { userId: req.user._id },
+        { 'splitDetails.userId': req.user._id.toString() },
+        { 'splitDetails.userId': req.user.name }
+      ]
+    });
 
     // 1. Calculate net balance for each user
     const balances = {}; // { userId: netAmount } (Positive means they are owed, negative means they owe)

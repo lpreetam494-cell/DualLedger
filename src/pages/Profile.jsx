@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, User, Banknote, Moon, Shield, ChevronRight, Download } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
@@ -9,7 +10,8 @@ function cn(...inputs) {
 }
 
 export default function Profile() {
-  const { theme, toggleTheme, expenses, currency, setCurrency } = useStore();
+  const navigate = useNavigate();
+  const { theme, toggleTheme, expenses, currency, setCurrency, user, logout } = useStore();
 
   const handleCurrencyToggle = () => {
     const currencies = [
@@ -67,8 +69,8 @@ export default function Profile() {
         <div className="w-24 h-24 bg-[#1F2123] rounded-full flex items-center justify-center mb-4 border-4 border-white dark:border-gray-800 shadow-sm overflow-hidden">
           <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Large Profile" className="w-full h-full object-cover" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white">Alexander Wright</h2>
-        <p className="text-sm text-gray-500 mt-1">Premium Member</p>
+        <h2 className="text-2xl font-bold dark:text-white">{user ? user.name : 'Guest'}</h2>
+        <p className="text-sm text-gray-500 mt-1">{user ? user.email : 'Not logged in'}</p>
       </div>
 
       <div>
@@ -114,7 +116,10 @@ export default function Profile() {
       </div>
 
       <div className="pt-2">
-        <button className="w-full bg-white dark:bg-[#1A2130] text-red-600 font-semibold py-4 rounded-3xl shadow-sm border-2 border-transparent hover:border-red-100 dark:hover:border-red-900 transition-colors">
+        <button 
+          onClick={() => { logout(); navigate('/login'); }}
+          className="w-full bg-white dark:bg-[#1A2130] text-red-600 font-semibold py-4 rounded-3xl shadow-sm border-2 border-transparent hover:border-red-100 dark:hover:border-red-900 transition-colors"
+        >
           Log Out
         </button>
       </div>
