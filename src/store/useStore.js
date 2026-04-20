@@ -3,7 +3,13 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+const storedUser = JSON.parse(localStorage.getItem('user'));
+if (storedUser && storedUser.token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${storedUser.token}`;
+}
+
 export const useStore = create((set) => ({
+  user: storedUser || null,
   expenses: [],
   insights: null,
   splitBalances: null,
@@ -21,6 +27,38 @@ export const useStore = create((set) => ({
   setCurrency: (newCurrency) => {
     localStorage.setItem('currency', JSON.stringify(newCurrency));
     set({ currency: newCurrency });
+  },
+
+  login: async (email, password) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+      const userData = response.data;
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+      set({ user: userData, loading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || error.message, loading: false });
+    }
+  },
+
+  register: async (name, email, password) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/auth/register`, { name, email, password });
+      const userData = response.data;
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+      set({ user: userData, loading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || error.message, loading: false });
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    set({ user: null, expenses: [], insights: null, splitBalances: null });
   },
 
   fetchExpenses: async () => {

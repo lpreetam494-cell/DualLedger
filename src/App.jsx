@@ -6,10 +6,13 @@ import Expenses from "./pages/Expenses";
 import Split from "./pages/Split";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { useStore } from "./store/useStore";
 
 export default function App() {
-  const { theme } = useStore();
+  const { theme, user } = useStore();
 
   return (
     <Router>
@@ -18,14 +21,16 @@ export default function App() {
           <div className="w-full max-w-md bg-gray-50 dark:bg-[#0B101B] min-h-screen relative shadow-2xl overflow-hidden transition-colors duration-300">
             <div className="pb-24 h-full overflow-y-auto no-scrollbar">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/split" element={<Split />} />
-              <Route path="/insights" element={<Insights />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+              <Route path="/split" element={<ProtectedRoute><Split /></ProtectedRoute>} />
+              <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             </Routes>
           </div>
-          <Navigation />
+          {user && <Navigation />}
         </div>
       </div>
       </div>
