@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Utensils, CarFront, ShoppingBag, Home as HomeIcon, Building2, Layers } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useStore } from '../store/useStore';
 
 export default function Home() {
-  const { insights, fetchInsights, loading, currency } = useStore();
+  const navigate = useNavigate();
+  const { insights, fetchInsights, loading, currency, toggleNotifications } = useStore();
 
   useEffect(() => {
     fetchInsights();
@@ -39,7 +41,7 @@ export default function Home() {
           <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
           <h1 className="text-xl font-bold">DualLedger</h1>
         </div>
-        <button className="p-2 bg-white rounded-full shadow-sm">
+        <button onClick={toggleNotifications} className="p-2 bg-white rounded-full shadow-sm">
           <Bell size={20} className="text-gray-800" />
         </button>
       </div>
@@ -52,10 +54,16 @@ export default function Home() {
           <span className="text-xs text-gray-500">vs last month</span>
         </div>
         <div className="flex gap-3">
-          <button className="flex-1 bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition">
+          <button 
+            onClick={() => navigate('/expenses')}
+            className="flex-1 bg-black text-white font-medium py-3 rounded-xl hover:bg-gray-800 transition"
+          >
             Add<br />Expense
           </button>
-          <button className="flex-1 bg-primary text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition shadow-[0_4px_14px_0_rgba(0,82,255,0.39)]">
+          <button 
+            onClick={() => navigate('/split')}
+            className="flex-1 bg-primary text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition shadow-[0_4px_14px_0_rgba(0,82,255,0.39)]"
+          >
             Split<br />Expense
           </button>
         </div>

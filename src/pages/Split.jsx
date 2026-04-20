@@ -9,21 +9,46 @@ function cn(...inputs) {
 }
 
 export default function Split() {
-  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user } = useStore();
+  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user, toggleNotifications } = useStore();
   
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('0.00');
+  const [participants, setParticipants] = useState([]);
+  const [newParticipant, setNewParticipant] = useState('');
+
+  const handleAddParticipant = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      e.preventDefault();
+      if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
+        setParticipants([...participants, newParticipant.trim()]);
+        setNewParticipant('');
+      }
+    }
+  };
+
+  const removeParticipant = (name) => {
+    setParticipants(participants.filter(p => p !== name));
+  };
 
   useEffect(() => {
     fetchSplitBalances();
   }, [fetchSplitBalances]);
 
   const handleSaveSplit = async () => {
-    if (!desc || amount === '0.00') return;
+    if (!desc || amount === '0.00' || participants.length === 0) {
+      alert("Please enter a description, a valid amount, and add at least one participant to split with.");
+      return;
+    }
     
-    // Hardcode a split with 2 other users for demo purposes
+    // Dynamic split equal distribution
     const totalAmount = parseFloat(amount);
-    const splitAmount = totalAmount / 3;
+    const splitCount = participants.length + 1; // Participants + You
+    const splitAmount = totalAmount / splitCount;
+
+    const splitDetails = participants.map(name => ({
+      userId: name,
+      amountOwed: splitAmount
+    }));
 
     const success = await addExpense({
       amount: totalAmount,
@@ -31,15 +56,13 @@ export default function Split() {
       category: 'General',
       paymentMode: 'Split',
       isSplit: true,
-      splitDetails: [
-        { userId: 'Sarah J.', amountOwed: splitAmount },
-        { userId: 'Mike T.', amountOwed: splitAmount }
-      ]
+      splitDetails: splitDetails
     });
     
     if (success) {
       setDesc('');
       setAmount('0.00');
+      setParticipants([]);
       fetchSplitBalances(); // refresh debts
     } else {
       alert('Failed to add split expense!');
@@ -61,7 +84,7 @@ export default function Split() {
           <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-8 h-8 rounded-full border border-gray-200" />
           <h1 className="text-sm font-bold">DualLedger</h1>
         </div>
-        <button className="p-2">
+        <button onClick={toggleNotifications} className="p-2">
           <Bell size={20} className="text-gray-800" />
         </button>
       </div>
@@ -116,17 +139,34 @@ export default function Split() {
             </div>
           </div>
           <div>
-            <label className="text-xs font-semibold text-gray-700 block mb-2">Involved (3)</label>
+            <label className="text-xs font-semibold text-gray-700 block mb-2">Involved ({participants.length + 1})</label>
+            
+            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-2 mb-3 bg-white focus-within:border-primary">
+              <input 
+                type="text" 
+                value={newParticipant}
+                onChange={(e) => setNewParticipant(e.target.value)}
+                onKeyDown={handleAddParticipant}
+                placeholder="Add friend's name... (Press Enter)"
+                className="w-full text-sm outline-none bg-transparent"
+              />
+              <button onClick={handleAddParticipant} className="p-1 text-primary rounded outline-none w-6 h-6 flex items-center justify-center hover:bg-gray-100">
+                <Plus size={16} />
+              </button>
+            </div>
+
             <div className="flex flex-wrap gap-2">
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full">
+              <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full">
                 <span className="text-xs font-medium">You</span>
               </div>
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full">
-                <span className="text-xs font-medium">Sarah J.</span>
-              </div>
-              <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full">
-                <span className="text-xs font-medium">Mike T.</span>
-              </div>
+              {participants.map((p, i) => (
+                <div key={i} className="flex items-center gap-1 bg-gray-100 px-3 py-1.5 rounded-full group cursor-pointer hover:bg-red-50 transition-colors">
+                  <span className="text-xs font-medium text-gray-700">{p}</span>
+                  <button onClick={() => removeParticipant(p)} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                    &times;
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
           <button onClick={handleSaveSplit} disabled={loading} className="w-full bg-primary text-white font-semibold py-3 rounded-xl mt-2 shadow-[0_4px_14px_0_rgba(0,82,255,0.39)] disabled:opacity-50">

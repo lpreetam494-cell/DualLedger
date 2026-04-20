@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useStore } from "./store/useStore";
+import NotificationModal from "./components/NotificationModal";
 
 export default function App() {
   const { theme, user } = useStore();
@@ -31,6 +32,7 @@ export default function App() {
             </Routes>
           </div>
           {user && <Navigation />}
+          {user && <NotificationModal />}
         </div>
       </div>
       </div>

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, Banknote, Moon, Shield, ChevronRight, Download } from 'lucide-react';
+import { Bell, User, Banknote, Moon, Shield, ChevronRight, Download, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -11,7 +11,9 @@ function cn(...inputs) {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { theme, toggleTheme, expenses, currency, setCurrency, user, logout } = useStore();
+  const { theme, toggleTheme, expenses, currency, setCurrency, user, logout, toggleNotifications } = useStore();
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [securityOpen, setSecurityOpen] = useState(false);
 
   const handleCurrencyToggle = () => {
     const currencies = [
@@ -60,7 +62,7 @@ export default function Profile() {
           <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-800" />
           <h1 className="text-sm font-bold dark:text-white">DualLedger</h1>
         </div>
-        <button className="p-2">
+        <button className="p-2" onClick={toggleNotifications}>
           <Bell size={20} className="text-gray-800 dark:text-white" />
         </button>
       </div>
@@ -76,7 +78,7 @@ export default function Profile() {
       <div>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-4">ACCOUNT & DATA</p>
         <div className="bg-white dark:bg-[#1A2130] rounded-3xl shadow-sm overflow-hidden transition-colors">
-          <SettingItem icon={User} title="Personal Information" subtitle="Update your details" hasArrow borderBottom />
+          <SettingItem icon={User} title="Personal Information" subtitle="Update your details" hasArrow borderBottom cursor="pointer" onClick={() => setInfoOpen(true)} />
           <SettingItem 
             icon={Banknote} 
             title="Currency" 
@@ -111,7 +113,7 @@ export default function Profile() {
             } 
             borderBottom 
           />
-          <SettingItem icon={Shield} title="Security & Privacy" subtitle="Password, 2FA" hasArrow />
+          <SettingItem icon={Shield} title="Security & Privacy" subtitle="Password, 2FA" hasArrow cursor="pointer" onClick={() => setSecurityOpen(true)} />
         </div>
       </div>
 
@@ -123,6 +125,57 @@ export default function Profile() {
           Log Out
         </button>
       </div>
+
+      {/* Modals */}
+      {infoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setInfoOpen(false)}></div>
+          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold dark:text-white">Personal Info</h2>
+              <button onClick={() => setInfoOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Full Name</label>
+                <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-sm">{user?.name}</div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Email Address</label>
+                <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-sm">{user?.email}</div>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">Account ID</label>
+                <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-xs font-mono text-gray-400">{user?._id}</div>
+              </div>
+              <button className="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 font-semibold rounded-xl" disabled>Update (Coming Soon)</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {securityOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSecurityOpen(false)}></div>
+          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+              <h2 className="text-xl font-bold dark:text-white">Security & Privacy</h2>
+              <button onClick={() => setSecurityOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <Shield className="text-green-500" size={24} />
+                <div>
+                  <h3 className="font-bold text-sm dark:text-white">Account Secured</h3>
+                  <p className="text-xs text-gray-500">Your details are encrypted with JWT & proper hashing protocols.</p>
+                </div>
+              </div>
+              <button className="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 font-semibold rounded-xl">Change Password</button>
+              <button className="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold rounded-xl">Enable 2FA (Coming Soon)</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
