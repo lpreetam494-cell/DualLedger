@@ -9,7 +9,7 @@ function cn(...inputs) {
 }
 
 export default function Split() {
-  const { splitBalances, fetchSplitBalances, addExpense, loading, currency } = useStore();
+  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user } = useStore();
   
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('0.00');
@@ -25,7 +25,7 @@ export default function Split() {
     const totalAmount = parseFloat(amount);
     const splitAmount = totalAmount / 3;
 
-    await addExpense({
+    const success = await addExpense({
       amount: totalAmount,
       description: desc,
       category: 'General',
@@ -37,16 +37,20 @@ export default function Split() {
       ]
     });
     
-    setDesc('');
-    setAmount('0.00');
-    fetchSplitBalances(); // refresh debts
+    if (success) {
+      setDesc('');
+      setAmount('0.00');
+      fetchSplitBalances(); // refresh debts
+    } else {
+      alert('Failed to add split expense!');
+    }
   };
 
   const netBalances = splitBalances?.netBalances || {};
   const settlements = splitBalances?.settlements || [];
 
-  // Calculate my balance (mock-user-1)
-  const myBalance = netBalances['mock-user-1'] || 0;
+  // Calculate my balance
+  const myBalance = netBalances[user?._id] || 0;
   const iOwe = myBalance < 0 ? Math.abs(myBalance) : 0;
   const imOwed = myBalance > 0 ? myBalance : 0;
 
@@ -88,7 +92,7 @@ export default function Split() {
             <div className="space-y-3">
               {settlements.map((s, idx) => (
                 <div key={idx} className="flex justify-between items-center border-b border-gray-800 pb-2">
-                  <span className="text-sm">{s.from === 'mock-user-1' ? 'You' : s.from} pays {s.to === 'mock-user-1' ? 'You' : s.to}</span>
+                  <span className="text-sm">{s.from === user?._id ? 'You' : s.from} pays {s.to === user?._id ? 'You' : s.to}</span>
                   <span className="font-bold">{currency.symbol}{s.amount.toFixed(2)}</span>
                 </div>
               ))}

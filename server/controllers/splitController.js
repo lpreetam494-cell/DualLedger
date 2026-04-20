@@ -18,7 +18,7 @@ export const getSplitBalances = async (req, res) => {
     const balances = {}; // { userId: netAmount } (Positive means they are owed, negative means they owe)
 
     expenses.forEach(exp => {
-      const payer = exp.userId;
+      const payer = exp.userId.toString();
       const amountPaid = exp.amount;
 
       // Payer is owed the full amount initially (from the group)

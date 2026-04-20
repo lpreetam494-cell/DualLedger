@@ -31,7 +31,10 @@ export default function Expenses() {
   }, [fetchExpenses]);
 
   const handleSaveExpense = async () => {
-    if (!amount || amount === '0.00' || !description) return;
+    if (!amount || amount === '0.00' || !description) {
+      alert('Please enter a valid amount and description.');
+      return;
+    }
     
     const success = await addExpense({
       amount: parseFloat(amount),
@@ -44,6 +47,8 @@ export default function Expenses() {
     if (success) {
       setAmount('0.00');
       setDescription('');
+    } else {
+      alert('Failed to save expense. Please verify your fields or check if you are logged in.');
     }
   };
 
