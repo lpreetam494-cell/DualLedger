@@ -21,16 +21,21 @@ export const getSplitBalances = async (req, res) => {
       const payer = exp.userId.toString();
       const amountPaid = exp.amount;
 
-      // Payer is owed the full amount initially (from the group)
+      // Payer is credited the full amount they paid initially
       balances[payer] = (balances[payer] || 0) + amountPaid;
 
+      let othersOweTotal = 0;
       // Subtract the amount each person owes from their balance
       exp.splitDetails.forEach(split => {
         const borrower = split.userId;
         const amountOwed = split.amountOwed;
-
+        othersOweTotal += amountOwed;
         balances[borrower] = (balances[borrower] || 0) - amountOwed;
       });
+
+      // Deduct the payer's OWN share from their balance
+      const payerOwnShare = amountPaid - othersOweTotal;
+      balances[payer] = (balances[payer] || 0) - payerOwnShare;
     });
 
     // 2. Separate debtors and creditors

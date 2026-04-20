@@ -15,10 +15,11 @@ export const getExpenses = async (req, res) => {
 // @route   POST /api/expenses
 export const addExpense = async (req, res) => {
   try {
-    const { amount, category, paymentMode, notes, description, date, isSplit, splitDetails } = req.body;
+    const { type, amount, category, paymentMode, notes, description, date, isSplit, splitDetails } = req.body;
 
     const expense = new Expense({
       userId: req.user._id,
+      type: type || 'expense',
       amount,
       category,
       paymentMode,
@@ -88,9 +89,9 @@ export const getInsights = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Total spend and Category breakdown
+    // Total spend and Category breakdown (only for 'expense' type)
     const categoryStats = await Expense.aggregate([
-      { $match: { userId } },
+      { $match: { userId, type: 'expense' } },
       { 
         $group: { 
           _id: '$category', 
@@ -101,9 +102,9 @@ export const getInsights = async (req, res) => {
       { $sort: { totalSpent: -1 } }
     ]);
 
-    // Spending Trends (Group by day of week)
+    // Spending Trends (Group by day of week, only expenses)
     const dayTrends = await Expense.aggregate([
-      { $match: { userId } },
+      { $match: { userId, type: 'expense' } },
       { 
         $group: { 
           _id: { $dayOfWeek: '$date' }, 
@@ -115,6 +116,16 @@ export const getInsights = async (req, res) => {
 
     const totalOverall = categoryStats.reduce((acc, curr) => acc + curr.totalSpent, 0);
 
+    // Calculate Total Income
+    const incomeStats = await Expense.aggregate([
+      { $match: { userId, type: 'income' } },
+      { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
+    ]);
+    const totalIncome = incomeStats.length > 0 ? incomeStats[0].totalIncome : 0;
+    
+    // Calculate Current Balance
+    const currentBalance = totalIncome - totalOverall;
+
     // Map Mongo dayOfWeek (1=Sun, 2=Mon, etc.) to String
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let peakDay = "None";
@@ -124,6 +135,8 @@ export const getInsights = async (req, res) => {
 
     res.json({
       totalSpent: totalOverall,
+      totalIncome: totalIncome,
+      currentBalance: currentBalance,
       categories: categoryStats,
       peakSpendingDay: peakDay,
       dayTrends

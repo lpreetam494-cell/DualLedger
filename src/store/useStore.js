@@ -102,7 +102,7 @@ export const useStore = create((set) => ({
   fetchSplitBalances: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/splits/balances`);
+      const response = await axios.get(`${API_URL}/expenses/splits/balances`);
       set({ splitBalances: response.data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });

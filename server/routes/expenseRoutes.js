@@ -21,11 +21,12 @@ router.route('/')
   .get(getExpenses)
   .post(addExpense);
 
+// Split routes MUST be above /:id
+router.get('/splits/balances', getSplitBalances);
+
 router.route('/:id')
   .put(updateExpense)
   .delete(deleteExpense);
 
-// Split routes
-router.get('/splits/balances', getSplitBalances);
 
 export default router;

@@ -13,6 +13,7 @@ export default function Home() {
   }, [fetchInsights]);
 
   const totalSpent = insights?.totalSpent || 0;
+  const currentBalance = insights?.currentBalance || 0;
   const categories = insights?.categories || [];
   const dayTrends = insights?.dayTrends || [];
 
@@ -48,7 +49,7 @@ export default function Home() {
 
       <div className="bg-white p-6 rounded-[2rem] shadow-soft">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Balance</p>
-        <h2 className="text-4xl font-extrabold tracking-tight mb-2">{currency.symbol}124,590.00</h2>
+        <h2 className="text-4xl font-extrabold tracking-tight mb-2">{currency.symbol}{currentBalance.toFixed(2)}</h2>
         <div className="flex items-center gap-2 mb-6">
           <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-md">+2.4%</span>
           <span className="text-xs text-gray-500">vs last month</span>

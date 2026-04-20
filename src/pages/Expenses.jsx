@@ -21,6 +21,7 @@ const getCategoryIcon = (category) => {
 
 export default function Expenses() {
   const { expenses, fetchExpenses, addExpense, loading, currency } = useStore();
+  const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('0.00');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Food & Dining');
@@ -37,6 +38,7 @@ export default function Expenses() {
     }
     
     const success = await addExpense({
+      type,
       amount: parseFloat(amount),
       description,
       category,
@@ -97,7 +99,8 @@ export default function Expenses() {
                       title={exp.description} 
                       category={exp.category} 
                       mode={exp.paymentMode} 
-                      amount={`-${currency.symbol}${exp.amount.toFixed(2)}`} 
+                      amount={`${exp.type === 'income' ? '+' : '-'}${currency.symbol}${exp.amount.toFixed(2)}`} 
+                      isIncome={exp.type === 'income'}
                       time={format(new Date(exp.date), 'hh:mm a')} 
                     />
                   ))}
@@ -114,7 +117,23 @@ export default function Expenses() {
 
       <div className="fixed bottom-[80px] w-full max-w-md px-4 z-40">
         <div className="bg-[#0B101B] rounded-[2rem] p-6 shadow-2xl">
-          <h3 className="text-white font-semibold mb-4">New Entry</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-white font-semibold">New Entry</h3>
+            <div className="flex bg-[#1A2130] rounded-lg p-1">
+              <button 
+                onClick={() => setType('expense')}
+                className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'expense' ? "bg-gray-700 text-white shadow" : "text-gray-400")}
+              >
+                Expense
+              </button>
+              <button 
+                onClick={() => setType('income')}
+                className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'income' ? "bg-green-600 text-white shadow" : "text-gray-400")}
+              >
+                Income
+              </button>
+            </div>
+          </div>
           
           <div className="flex items-center text-gray-400 text-5xl font-semibold mb-6 border-b border-gray-800 pb-2">
             <span className="mr-2">{currency.symbol}</span>
@@ -175,9 +194,9 @@ export default function Expenses() {
           <button 
             onClick={handleSaveExpense}
             disabled={loading}
-            className="w-full bg-primary text-white font-semibold py-4 rounded-xl mt-6 shadow-[0_4px_14px_0_rgba(0,82,255,0.39)] disabled:opacity-50"
+            className={cn("w-full text-white font-semibold py-4 rounded-xl mt-6 shadow-lg disabled:opacity-50 transition-colors", type === 'income' ? 'bg-green-600 hover:bg-green-500' : 'bg-primary')}
           >
-            {loading ? 'Saving...' : 'Save Expense'}
+            {loading ? 'Saving...' : `Save ${type === 'income' ? 'Income' : 'Expense'}`}
           </button>
         </div>
       </div>
@@ -185,7 +204,7 @@ export default function Expenses() {
   );
 }
 
-function ExpenseItem({ icon: Icon, title, category, mode, amount, time }) {
+function ExpenseItem({ icon: Icon, title, category, mode, amount, time, isIncome }) {
   return (
     <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm">
       <div className="flex items-center gap-4">
@@ -202,7 +221,7 @@ function ExpenseItem({ icon: Icon, title, category, mode, amount, time }) {
         </div>
       </div>
       <div className="text-right">
-        <span className="block text-sm font-bold text-gray-900">{amount}</span>
+        <span className={cn("block text-sm font-bold", isIncome ? "text-green-600" : "text-gray-900")}>{amount}</span>
         <span className="text-[10px] text-gray-500">{time}</span>
       </div>
     </div>

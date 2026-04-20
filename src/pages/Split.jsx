@@ -15,6 +15,7 @@ export default function Split() {
   const [amount, setAmount] = useState('0.00');
   const [participants, setParticipants] = useState([]);
   const [newParticipant, setNewParticipant] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAddParticipant = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
@@ -40,32 +41,37 @@ export default function Split() {
       return;
     }
     
-    // Dynamic split equal distribution
-    const totalAmount = parseFloat(amount);
-    const splitCount = participants.length + 1; // Participants + You
-    const splitAmount = totalAmount / splitCount;
+    setIsSaving(true);
+    try {
+      // Dynamic split equal distribution
+      const totalAmount = parseFloat(amount);
+      const splitCount = participants.length + 1; // Participants + You
+      const splitAmount = totalAmount / splitCount;
 
-    const splitDetails = participants.map(name => ({
-      userId: name,
-      amountOwed: splitAmount
-    }));
+      const splitDetails = participants.map(name => ({
+        userId: name,
+        amountOwed: splitAmount
+      }));
 
-    const success = await addExpense({
-      amount: totalAmount,
-      description: desc,
-      category: 'General',
-      paymentMode: 'Split',
-      isSplit: true,
-      splitDetails: splitDetails
-    });
-    
-    if (success) {
-      setDesc('');
-      setAmount('0.00');
-      setParticipants([]);
-      fetchSplitBalances(); // refresh debts
-    } else {
-      alert('Failed to add split expense!');
+      const success = await addExpense({
+        amount: totalAmount,
+        description: desc,
+        category: 'General',
+        paymentMode: 'Split',
+        isSplit: true,
+        splitDetails: splitDetails
+      });
+      
+      if (success) {
+        setDesc('');
+        setAmount('0.00');
+        setParticipants([]);
+        await fetchSplitBalances(); // refresh debts immediately
+      } else {
+        alert('Failed to add split expense!');
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -169,8 +175,8 @@ export default function Split() {
               ))}
             </div>
           </div>
-          <button onClick={handleSaveSplit} disabled={loading} className="w-full bg-primary text-white font-semibold py-3 rounded-xl mt-2 shadow-[0_4px_14px_0_rgba(0,82,255,0.39)] disabled:opacity-50">
-            {loading ? 'Saving...' : 'Save & Split Equally'}
+          <button onClick={handleSaveSplit} disabled={isSaving} className="w-full bg-primary text-white font-semibold py-3 rounded-xl mt-2 shadow-[0_4px_14px_0_rgba(0,82,255,0.39)] disabled:opacity-50">
+            {isSaving ? 'Saving...' : 'Save & Split Equally'}
           </button>
         </div>
       </div>
