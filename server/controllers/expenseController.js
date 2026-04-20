@@ -4,7 +4,7 @@ import Expense from '../models/Expense.js';
 // @route   GET /api/expenses
 export const getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ userId: 'mock-user-1' }).sort({ date: -1 });
+    const expenses = await Expense.find({ userId: req.user._id }).sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -18,6 +18,7 @@ export const addExpense = async (req, res) => {
     const { amount, category, paymentMode, notes, description, date, isSplit, splitDetails } = req.body;
 
     const expense = new Expense({
+      userId: req.user._id,
       amount,
       category,
       paymentMode,
@@ -85,7 +86,7 @@ export const deleteExpense = async (req, res) => {
 // @route   GET /api/expenses/insights
 export const getInsights = async (req, res) => {
   try {
-    const userId = 'mock-user-1';
+    const userId = req.user._id;
 
     // Total spend and Category breakdown
     const categoryStats = await Expense.aggregate([

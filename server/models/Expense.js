@@ -13,9 +13,9 @@ const splitDetailSchema = new mongoose.Schema({
 
 const expenseSchema = new mongoose.Schema({
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    default: 'mock-user-1' // Hardcoded until Auth is implemented
+    ref: 'User'
   },
   amount: {
     type: Number,
