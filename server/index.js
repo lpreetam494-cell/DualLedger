@@ -14,10 +14,19 @@ app.use(express.json());
 
 import expenseRoutes from './routes/expenseRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import recurringRoutes from './routes/recurringRoutes.js';
+import { startCronJobs } from './cron.js';
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/recurring', recurringRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Running 🚀');
@@ -32,6 +41,9 @@ const startServer = async () => {
     
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB Connected ✅');
+
+    // Start background background sweep for subscriptions
+    startCronJobs();
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

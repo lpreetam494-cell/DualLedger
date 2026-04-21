@@ -51,6 +51,10 @@ const expenseSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group'
+  },
   splitDetails: {
     type: [splitDetailSchema],
     default: []
