@@ -445,11 +445,9 @@ export default function Transactions() {
                     <Plus size={16} />
                   </button>
                 </div>
-              </div>
-            )}
 
-                 <div className="flex flex-wrap gap-2 pt-1">
-                   <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
                      <span className="text-xs font-medium">You</span>
                    </div>
                    {participants.map((p, i) => (
