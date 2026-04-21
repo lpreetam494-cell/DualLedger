@@ -58,7 +58,9 @@ export default function Home() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 shadow-sm" />
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </div>
           <h1 className="text-xl font-bold dark:text-white">DualLedger</h1>
         </div>
         <div className="flex items-center gap-2">

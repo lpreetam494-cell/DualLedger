@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
       type: Map,
       of: Number,
       default: {}
-    }
+    },
+    groups: [{
+      name: { type: String, required: true },
+      members: { type: [String], required: true }
+    }]
   },
   friends: [{
     type: mongoose.Schema.Types.ObjectId,

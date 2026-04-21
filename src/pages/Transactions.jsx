@@ -37,10 +37,11 @@ export default function Transactions() {
   const [isSplit, setIsSplit] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [newParticipant, setNewParticipant] = useState('');
-  
-  // Recurring Form state
   const [frequency, setFrequency] = useState('monthly');
   const [nextRunDate, setNextRunDate] = useState('');
+
+  const [selectedGroup, setSelectedGroup] = useState('');
+  const savedGroups = user?.preferences?.groups || [];
 
   const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'];
   const defaultIncomeCategories = ['Salary', 'Freelance', 'Investments', 'Gift'];
@@ -362,15 +363,15 @@ export default function Transactions() {
             )}
 
             {activeTab === 'transactions' && isSplit && type === 'expense' && (
-               <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
-                 <label className="text-xs font-semibold text-gray-400 block">Involved ({participants.length + 1})</label>
-                 
-                 <div className="flex gap-2">
+              <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
+                <label className="text-xs font-semibold text-gray-400 block">Select Group (Optional)</label>
+                <div className="flex gap-2">
                     <select 
-                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors"
+                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors cursor-pointer"
                       onChange={(e) => {
                         if (e.target.value === "") return;
-                        const group = groups.find(g => g._id === e.target.value);
+                        // Support both Anurag's backend groups and my preference groups
+                        const group = groups.find(g => g._id === e.target.value) || savedGroups.find(g => g.name === e.target.value);
                         if (group) {
                           const memberNames = group.members.filter(m => typeof m === 'object' ? m._id !== user._id : m !== user._id).map(m => m.name || m);
                           const uniqueMembers = [...new Set([...participants, ...memberNames])];
@@ -379,12 +380,13 @@ export default function Transactions() {
                         e.target.value = "";
                       }}
                     >
-                      <option value="">+ Group...</option>
-                      {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
+                      <option value="" className="bg-gray-800">+ Add Group...</option>
+                      {savedGroups.map(g => <option key={g.name} value={g.name} className="bg-gray-800">{g.name}</option>)}
+                      {groups.map(g => <option key={g._id} value={g._id} className="bg-gray-800">{g.name}</option>)}
                     </select>
 
                     <select 
-                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors"
+                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors cursor-pointer"
                       onChange={(e) => {
                         if (e.target.value === "") return;
                         const name = e.target.value;
@@ -392,10 +394,59 @@ export default function Transactions() {
                         e.target.value = "";
                       }}
                     >
-                      <option value="">+ Friend...</option>
-                      {friends.map(f => <option key={f._id} value={f.name}>{f.name}</option>)}
+                      <option value="" className="bg-gray-800">+ Add Friend...</option>
+                      {friends.map(f => <option key={f._id} value={f.name} className="bg-gray-800">{f.name}</option>)}
                     </select>
-                 </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-semibold text-gray-400">Involved ({participants.length + 1})</label>
+                  {participants.length > 0 && (
+                    <button 
+                      onClick={async () => {
+                        const groupName = prompt("Enter a name for this group:");
+                        if (groupName && groupName.trim()) {
+                          const newGroup = { name: groupName.trim(), members: participants };
+                          await updatePreferences({ groups: [...savedGroups, newGroup] });
+                          setSelectedGroup(groupName.trim());
+                        }
+                      }}
+                      className="text-[10px] font-bold text-primary uppercase tracking-wider hover:text-blue-400 transition-colors bg-blue-900/20 px-2 py-1 rounded-md"
+                    >
+                      Save as Group
+                    </button>
+                  )}
+                </div>
+                
+                <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-[#0B101B] focus-within:border-primary transition-colors">
+                  <input 
+                    type="text" 
+                    value={newParticipant}
+                    onChange={(e) => setNewParticipant(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.type === 'click') {
+                        e.preventDefault();
+                        if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
+                          setParticipants([...participants, newParticipant.trim()]);
+                          setNewParticipant('');
+                        }
+                      }
+                    }}
+                    placeholder="Or type a name manually... (Press Enter)"
+                    className="w-full text-sm outline-none bg-transparent text-white placeholder-gray-600"
+                  />
+                  <button onClick={(e) => {
+                      e.preventDefault();
+                      if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
+                        setParticipants([...participants, newParticipant.trim()]);
+                        setNewParticipant('');
+                      }
+                    }} className="p-1 text-primary rounded outline-none w-6 h-6 flex items-center justify-center hover:bg-gray-800">
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
 
                  <div className="flex flex-wrap gap-2 pt-1">
                    <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">

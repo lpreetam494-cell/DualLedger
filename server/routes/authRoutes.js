@@ -96,6 +96,7 @@ router.put('/preferences', protect, async (req, res) => {
       if (req.body.expenseCategories) user.preferences.expenseCategories = req.body.expenseCategories;
       if (req.body.incomeCategories) user.preferences.incomeCategories = req.body.incomeCategories;
       if (req.body.paymentModes) user.preferences.paymentModes = req.body.paymentModes;
+      if (req.body.groups) user.preferences.groups = req.body.groups;
 
       const updatedUser = await user.save();
       

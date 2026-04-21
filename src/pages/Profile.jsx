@@ -59,7 +59,9 @@ export default function Profile() {
     <div className="p-6 space-y-6 min-h-screen dark:bg-[#0B101B]">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-800" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm border border-gray-200 dark:border-gray-800">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </div>
           <h1 className="text-sm font-bold dark:text-white">DualLedger</h1>
         </div>
         <button className="p-2" onClick={toggleNotifications}>
@@ -69,7 +71,9 @@ export default function Profile() {
 
       <div className="flex flex-col items-center pt-4 pb-2">
         <div className="w-24 h-24 bg-[#1F2123] rounded-full flex items-center justify-center mb-4 border-4 border-white dark:border-gray-800 shadow-sm overflow-hidden">
-          <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Large Profile" className="w-full h-full object-cover" />
+          <div className="w-full h-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-4xl">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </div>
         </div>
         <h2 className="text-2xl font-bold dark:text-white">{user ? user.name : 'Guest'}</h2>
         <p className="text-sm text-gray-500 mt-1">{user ? user.email : 'Not logged in'}</p>
