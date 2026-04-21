@@ -14,7 +14,7 @@ const currencies = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const { insights, fetchInsights, loading, currency, setCurrency, toggleNotifications } = useStore();
+  const { user, insights, fetchInsights, loading, currency, setCurrency, toggleNotifications } = useStore();
 
   useEffect(() => {
     fetchInsights();
@@ -25,6 +25,16 @@ export default function Home() {
   const totalIncome = totalSpent + currentBalance;
   const categories = insights?.categories || [];
   const dayTrends = insights?.dayTrends || [];
+
+  const budgets = user?.preferences?.budgets || {};
+  const totalBudget = Object.values(budgets).reduce((acc, val) => acc + Number(val), 0);
+  const spendingPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  
+  const getProgressColor = (percent) => {
+    if (percent < 50) return 'bg-green-500';
+    if (percent < 85) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
 
   // Transform dayTrends to what recharts needs
   const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -88,19 +98,22 @@ export default function Home() {
       </div>
 
       <div className="flex gap-4">
-        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-3xl">
+        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-[2rem]">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Monthly Spending</p>
-          <h3 className="text-xl font-bold mb-4 dark:text-white">{currency.symbol}{totalSpent.toFixed(2)}</h3>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 mb-2">
-            <div className="bg-black dark:bg-primary h-1 rounded-full w-[65%]"></div>
+          <div className="flex items-baseline gap-2 mb-4">
+            <h3 className="text-xl font-bold dark:text-white">{currency.symbol}{totalSpent.toFixed(2)}</h3>
+            {totalBudget > 0 && <span className="text-xs text-gray-400">/ {currency.symbol}{totalBudget.toFixed(0)}</span>}
           </div>
-          <p className="text-[10px] text-gray-500 text-right">Current cycle</p>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2 overflow-hidden">
+            <div className={`h-full rounded-full transition-all duration-500 ${totalBudget > 0 ? getProgressColor(spendingPercentage) : "bg-black dark:bg-primary"}`} style={{ width: `${totalBudget > 0 ? Math.min(spendingPercentage, 100) : 65}%` }}></div>
+          </div>
+          <p className="text-[10px] text-gray-500 text-right">{totalBudget > 0 ? `${spendingPercentage.toFixed(0)}% used` : 'Current cycle'}</p>
         </div>
 
-        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-3xl">
+        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-[2rem]">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Income</p>
           <h3 className="text-xl font-bold mb-2 dark:text-white">{currency.symbol}{totalIncome.toFixed(2)}</h3>
-          <p className="text-[10px] text-gray-500">All time</p>
+          <p className="text-[10px] text-gray-500">Current cycle</p>
         </div>
       </div>
 

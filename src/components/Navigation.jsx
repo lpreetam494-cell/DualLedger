@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, ReceiptText, Users, TrendingUp, User } from 'lucide-react';
+import { Home, ReceiptText, Users, TrendingUp, User, Globe2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -12,6 +12,7 @@ const navItems = [
   { path: '/', label: 'HOME', icon: Home },
   { path: '/transactions', label: 'TXNS', icon: ReceiptText },
   { path: '/split', label: 'SPLIT', icon: Users },
+  { path: '/social', label: 'SOCIAL', icon: Globe2 },
   { path: '/insights', label: 'INSIGHTS', icon: TrendingUp },
   { path: '/profile', label: 'PROFILE', icon: User },
 ];

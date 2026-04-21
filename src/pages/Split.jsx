@@ -9,7 +9,7 @@ function cn(...inputs) {
 }
 
 export default function Split() {
-  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user, toggleNotifications } = useStore();
+  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user, toggleNotifications, groups, friends, fetchGroups, fetchFriends } = useStore();
   
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('0.00');
@@ -33,7 +33,9 @@ export default function Split() {
 
   useEffect(() => {
     fetchSplitBalances();
-  }, [fetchSplitBalances]);
+    fetchGroups();
+    fetchFriends();
+  }, [fetchSplitBalances, fetchGroups, fetchFriends]);
 
   const handleSaveSplit = async () => {
     if (!desc || amount === '0.00' || participants.length === 0) {
@@ -147,18 +149,37 @@ export default function Split() {
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-2">Involved ({participants.length + 1})</label>
             
-            <div className="flex items-center border border-gray-200 rounded-xl px-4 py-2 mb-3 bg-white focus-within:border-primary">
-              <input 
-                type="text" 
-                value={newParticipant}
-                onChange={(e) => setNewParticipant(e.target.value)}
-                onKeyDown={handleAddParticipant}
-                placeholder="Add friend's name... (Press Enter)"
-                className="w-full text-sm outline-none bg-transparent"
-              />
-              <button onClick={handleAddParticipant} className="p-1 text-primary rounded outline-none w-6 h-6 flex items-center justify-center hover:bg-gray-100">
-                <Plus size={16} />
-              </button>
+            <div className="flex gap-2 mb-3">
+               <select 
+                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none bg-white focus:border-primary"
+                 onChange={(e) => {
+                   if (e.target.value === "") return;
+                   const group = groups.find(g => g._id === e.target.value);
+                   if (group) {
+                     // Filter out user themselves, map back to names/emails if populated
+                     const memberNames = group.members.filter(m => typeof m === 'object' ? m._id !== user._id : m !== user._id).map(m => m.name || m);
+                     const uniqueMembers = [...new Set([...participants, ...memberNames])];
+                     setParticipants(uniqueMembers);
+                   }
+                   e.target.value = "";
+                 }}
+               >
+                 <option value="">+ Add Group...</option>
+                 {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
+               </select>
+
+               <select 
+                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none bg-white focus:border-primary"
+                 onChange={(e) => {
+                   if (e.target.value === "") return;
+                   const name = e.target.value;
+                   if (!participants.includes(name)) setParticipants([...participants, name]);
+                   e.target.value = "";
+                 }}
+               >
+                 <option value="">+ Add Friend...</option>
+                 {friends.map(f => <option key={f._id} value={f.name}>{f.name}</option>)}
+               </select>
             </div>
 
             <div className="flex flex-wrap gap-2">

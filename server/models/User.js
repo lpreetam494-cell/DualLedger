@@ -27,8 +27,21 @@ const userSchema = new mongoose.Schema({
     paymentModes: { 
       type: [String], 
       default: ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'UPI'] 
+    },
+    budgets: {
+      type: Map,
+      of: Number,
+      default: {}
     }
-  }
+  },
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  pendingFriendRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 }, {
   timestamps: true,
 });

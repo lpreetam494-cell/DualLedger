@@ -4,7 +4,20 @@ import Expense from '../models/Expense.js';
 // @route   GET /api/expenses
 export const getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ userId: req.user._id }).sort({ date: -1 });
+    const { startDate, endDate } = req.query;
+    let query = { userId: req.user._id };
+    
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.date.$lte = end;
+      }
+    }
+
+    const expenses = await Expense.find(query).sort({ date: -1 });
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -88,10 +101,32 @@ export const deleteExpense = async (req, res) => {
 export const getInsights = async (req, res) => {
   try {
     const userId = req.user._id;
+    const { startDate, endDate } = req.query;
+
+    let dateFilter = {};
+    if (startDate || endDate) {
+       dateFilter.date = {};
+       if (startDate) dateFilter.date.$gte = new Date(startDate);
+       if (endDate) {
+         const end = new Date(endDate);
+         end.setHours(23, 59, 59, 999);
+         dateFilter.date.$lte = end;
+       }
+    } else {
+       // Default to current month
+       const now = new Date();
+       dateFilter.date = { 
+           $gte: new Date(now.getFullYear(), now.getMonth(), 1),
+           $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+       };
+    }
+
+    const matchExpenses = { userId, type: 'expense', ...dateFilter };
+    const matchIncome = { userId, type: 'income', ...dateFilter };
 
     // Total spend and Category breakdown (only for 'expense' type)
     const categoryStats = await Expense.aggregate([
-      { $match: { userId, type: 'expense' } },
+      { $match: matchExpenses },
       { 
         $group: { 
           _id: '$category', 
@@ -104,7 +139,7 @@ export const getInsights = async (req, res) => {
 
     // Spending Trends (Group by day of week, only expenses)
     const dayTrends = await Expense.aggregate([
-      { $match: { userId, type: 'expense' } },
+      { $match: matchExpenses },
       { 
         $group: { 
           _id: { $dayOfWeek: '$date' }, 
@@ -118,7 +153,7 @@ export const getInsights = async (req, res) => {
 
     // Calculate Total Income
     const incomeStats = await Expense.aggregate([
-      { $match: { userId, type: 'income' } },
+      { $match: matchIncome },
       { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
     ]);
     const totalIncome = incomeStats.length > 0 ? incomeStats[0].totalIncome : 0;
