@@ -13,6 +13,11 @@ export const useStore = create((set) => ({
   expenses: [],
   insights: null,
   splitBalances: null,
+  groups: [],
+  friends: [],
+  pendingRequests: [],
+  notifications: [],
+  recurringExpenses: [],
   loading: false,
   error: null,
   theme: localStorage.getItem('theme') || 'light',
@@ -61,13 +66,15 @@ export const useStore = create((set) => ({
   logout: () => {
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
-    set({ user: null, expenses: [], insights: null, splitBalances: null });
+    set({ user: null, expenses: [], insights: null, splitBalances: null, recurringExpenses: [] });
   },
 
-  fetchExpenses: async () => {
+  fetchExpenses: async (startDate, endDate) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/expenses`);
+      let query = '';
+      if (startDate && endDate) query = `?startDate=${startDate}&endDate=${endDate}`;
+      const response = await axios.get(`${API_URL}/expenses${query}`);
       set({ expenses: response.data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
@@ -89,10 +96,12 @@ export const useStore = create((set) => ({
     }
   },
 
-  fetchInsights: async () => {
+  fetchInsights: async (startDate, endDate) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_URL}/expenses/insights`);
+      let query = '';
+      if (startDate && endDate) query = `?startDate=${startDate}&endDate=${endDate}`;
+      const response = await axios.get(`${API_URL}/expenses/insights${query}`);
       set({ insights: response.data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });
@@ -119,6 +128,146 @@ export const useStore = create((set) => ({
     } catch (error) {
       console.error("Failed to update preferences:", error);
       return false;
+    }
+  },
+
+  fetchGroups: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}/groups`);
+      set({ groups: response.data, loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+    }
+  },
+
+  createGroup: async (groupData) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/groups`, groupData);
+      set((state) => ({ groups: [...state.groups, response.data], loading: false }));
+      return true;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      return false;
+    }
+  },
+
+  fetchFriends: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}/users/friends`);
+      set({ 
+        friends: response.data.friends, 
+        pendingRequests: response.data.pendingRequests,
+        loading: false 
+      });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+    }
+  },
+
+  sendFriendRequest: async (targetUserId) => {
+    set({ loading: true, error: null });
+    try {
+      await axios.post(`${API_URL}/users/friend-request`, { targetUserId });
+      set({ loading: false });
+      return true;
+    } catch (error) {
+      set({ error: error.response?.data?.message || error.message, loading: false });
+      return false;
+    }
+  },
+
+  acceptFriendRequest: async (targetUserId) => {
+    set({ loading: true, error: null });
+    try {
+      await axios.post(`${API_URL}/users/friend-request/accept`, { targetUserId });
+      // Just re-fetch friends list. `this` doesn't work well in Zustand without `get()` but we can just use `useStore.getState().fetchFriends()`
+      // Actually `get().fetchFriends()` is correct within a Zustand action if we change the top to `(set, get) =>`.
+      // Let's modify the signature if needed or just use `get`. Wait, `get` is not destructured. Let's just fetch directly here.
+      const response = await axios.get(`${API_URL}/users/friends`);
+      set({ friends: response.data.friends, pendingRequests: response.data.pendingRequests, loading: false });
+      return true;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      return false;
+    }
+  },
+
+  rejectFriendRequest: async (targetUserId) => {
+      set({ loading: true, error: null });
+      try {
+        await axios.post(`${API_URL}/users/friend-request/reject`, { targetUserId });
+        const response = await axios.get(`${API_URL}/users/friends`);
+        set({ friends: response.data.friends, pendingRequests: response.data.pendingRequests, loading: false });
+        return true;
+      } catch (error) {
+        set({ error: error.message, loading: false });
+        return false;
+      }
+  },
+
+  searchUsers: async (email) => {
+    try {
+      const response = await axios.get(`${API_URL}/users/search?email=${email}`);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  },
+
+  fetchNotifications: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/notifications`);
+      set({ notifications: response.data });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  markNotificationAsRead: async (id) => {
+    try {
+      await axios.put(`${API_URL}/notifications/${id}/read`);
+      set((state) => ({
+        notifications: state.notifications.map(n => 
+          n._id === id ? { ...n, isRead: true } : n
+        )
+      }));
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  fetchRecurringExpenses: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}/recurring`);
+      set({ recurringExpenses: response.data, loading: false });
+    } catch (error) {
+      set({ error: error.message, loading: false });
+    }
+  },
+
+  addRecurringExpense: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.post(`${API_URL}/recurring`, data);
+      set((state) => ({ recurringExpenses: [...state.recurringExpenses, response.data], loading: false }));
+      return true;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      return false;
+    }
+  },
+
+  deleteRecurringExpense: async (id) => {
+    try {
+      await axios.delete(`${API_URL}/recurring/${id}`);
+      set((state) => ({ recurringExpenses: state.recurringExpenses.filter(r => r._id !== id) }));
+    } catch (error) {
+      console.error(error);
     }
   }
 }));

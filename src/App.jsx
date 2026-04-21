@@ -6,6 +6,7 @@ import Transactions from "./pages/Transactions";
 import Split from "./pages/Split";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
+import Social from "./pages/Social";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -27,6 +28,7 @@ export default function App() {
               <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
               <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
               <Route path="/split" element={<ProtectedRoute><Split /></ProtectedRoute>} />
+              <Route path="/social" element={<ProtectedRoute><Social /></ProtectedRoute>} />
               <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             </Routes>

@@ -1,11 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { X, Bell } from 'lucide-react';
+import { X, Bell, UserPlus, Users as GroupIcon, Check } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function NotificationModal() {
-  const { isNotificationsOpen, toggleNotifications } = useStore();
+  const { 
+    isNotificationsOpen, 
+    toggleNotifications, 
+    notifications, 
+    fetchNotifications, 
+    markNotificationAsRead,
+    acceptFriendRequest,
+    rejectFriendRequest
+  } = useStore();
+
+  useEffect(() => {
+    if (isNotificationsOpen) {
+      fetchNotifications();
+    }
+  }, [isNotificationsOpen, fetchNotifications]);
 
   if (!isNotificationsOpen) return null;
+
+  const getIcon = (type) => {
+    switch (type) {
+      case 'friend_request': return <UserPlus size={16} className="text-blue-500" />;
+      case 'group_invite': return <GroupIcon size={16} className="text-purple-500" />;
+      default: return <Bell size={16} className="text-gray-500" />;
+    }
+  };
+
+  const handleAcceptFriend = async (senderId, notifId) => {
+    await acceptFriendRequest(senderId);
+    await markNotificationAsRead(notifId);
+  };
+
+  const handleRejectFriend = async (senderId, notifId) => {
+    await rejectFriendRequest(senderId);
+    await markNotificationAsRead(notifId);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -31,19 +64,56 @@ export default function NotificationModal() {
         </div>
         
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar">
-          {/* Mock Notifications */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
-            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Welcome to DualLedger! 🎉</p>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Start tracking your expenses and simplifying debts.</p>
-            <p className="text-[10px] text-blue-400 dark:text-blue-500 mt-2">Just now</p>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="w-2 h-2 mt-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
-            <div>
-              <p className="text-sm text-gray-800 dark:text-gray-200"><span className="font-semibold">Security Alert:</span> New login detected from MacOS.</p>
-              <p className="text-[10px] text-gray-400 mt-1">Yesterday</p>
-            </div>
-          </div>
+          {notifications.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm">No new notifications.</p>
+          ) : (
+            notifications.map(n => (
+              <div 
+                key={n._id} 
+                className={`p-4 rounded-xl border flex gap-3 ${n.isRead ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800'}`}
+              >
+                <div className="mt-0.5">
+                  {getIcon(n.type)}
+                </div>
+                <div className="flex-1">
+                  <p className={`text-sm ${n.isRead ? 'text-gray-600' : 'font-semibold text-gray-900 dark:text-blue-100'}`}>
+                    {n.message}
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                  </p>
+
+                  {!n.isRead && n.type === 'friend_request' && (
+                    <div className="flex justify-end gap-2 mt-3">
+                      <button 
+                        onClick={() => handleAcceptFriend(n.relatedId, n._id)}
+                        className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-bold"
+                      >
+                        Accept
+                      </button>
+                      <button 
+                        onClick={() => handleRejectFriend(n.relatedId, n._id)}
+                        className="bg-gray-200 text-gray-600 px-3 py-1 rounded-lg text-xs font-bold"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  )}
+
+                  {!n.isRead && n.type !== 'friend_request' && (
+                    <div className="flex justify-end mt-2">
+                      <button 
+                         onClick={() => markNotificationAsRead(n._id)}
+                         className="text-xs font-semibold text-primary"
+                      >
+                         Mark Read
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
