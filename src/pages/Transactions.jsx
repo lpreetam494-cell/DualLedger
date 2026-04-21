@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Layers, CreditCard, Utensils, CarFront, ShoppingCart, Pencil, ChevronDown, CircleAlert, Building2, Plus } from 'lucide-react';
+import { Calendar, Layers, CreditCard, Utensils, CarFront, ShoppingCart, Pencil, ChevronDown, Download, RefreshCw, Building2, Plus, Trash2 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
@@ -20,16 +20,27 @@ const getCategoryIcon = (category) => {
 };
 
 export default function Transactions() {
-  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences, fetchSplitBalances } = useStore();
+  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences, fetchSplitBalances, groups, friends, fetchGroups, fetchFriends, recurringExpenses, fetchRecurringExpenses, addRecurringExpense, deleteRecurringExpense } = useStore();
+  
+  const [activeTab, setActiveTab] = useState('transactions'); // 'transactions' or 'recurring'
   const [type, setType] = useState('expense');
-  const [amount, setAmount] = useState('0.00');
+  
+  // Date Filters
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Form State
+  const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
-  
   const [isSplit, setIsSplit] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [newParticipant, setNewParticipant] = useState('');
+  
+  // Recurring Form state
+  const [frequency, setFrequency] = useState('monthly');
+  const [nextRunDate, setNextRunDate] = useState('');
 
   const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'];
   const defaultIncomeCategories = ['Salary', 'Freelance', 'Investments', 'Gift'];
@@ -54,8 +65,14 @@ export default function Transactions() {
   }, [user?.preferences?.paymentModes]);
 
   useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
+    fetchExpenses(startDate, endDate);
+  }, [startDate, endDate, fetchExpenses]);
+
+  useEffect(() => {
+    fetchGroups();
+    fetchFriends();
+    fetchRecurringExpenses();
+  }, [fetchGroups, fetchFriends, fetchRecurringExpenses]);
 
   const handleCategoryChange = async (e) => {
     const val = e.target.value;
@@ -76,41 +93,41 @@ export default function Transactions() {
     }
   };
 
-  const handlePaymentChange = async (e) => {
-    const val = e.target.value;
-    if (val === 'ADD_NEW') {
-      const newMode = prompt("Enter new payment mode:");
-      if (newMode && newMode.trim()) {
-        if (!paymentModes.includes(newMode.trim())) {
-          await updatePreferences({ paymentModes: [...paymentModes, newMode.trim()] });
-        }
-        setPaymentMode(newMode.trim());
-      } else {
-        setPaymentMode(paymentModes[0]);
-      }
-    } else {
-      setPaymentMode(val);
-    }
-  };
-
-  const handleAddParticipant = (e) => {
-    if (e.key === 'Enter' || e.type === 'click') {
-      e.preventDefault();
-      if (newParticipant.trim() && !participants.includes(newParticipant.trim())) {
-        setParticipants([...participants, newParticipant.trim()]);
-        setNewParticipant('');
-      }
-    }
-  };
-
-  const removeParticipant = (name) => {
-    setParticipants(participants.filter(p => p !== name));
+  const exportToCSV = () => {
+    if (expenses.length === 0) return;
+    const headers = ['Date', 'Type', 'Amount', 'Category', 'Mode', 'Description'];
+    const rows = expenses.map(e => [
+      new Date(e.date).toISOString().split('T')[0],
+      e.type,
+      e.amount,
+      e.category,
+      e.paymentMode,
+      `"${e.description}"`
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `ledger_export_${new Date().getTime()}.csv`;
+    link.click();
   };
 
   const handleSaveExpense = async () => {
     if (!amount || amount === '0.00' || !description) {
       alert('Please enter a valid amount and description.');
       return;
+    }
+
+    if (activeTab === 'recurring') {
+       if (!nextRunDate) { alert('Please enter a start date for the recurring expense.'); return; }
+       const success = await addRecurringExpense({
+         amount: parseFloat(amount),
+         description, category, paymentMode, frequency, nextRunDate
+       });
+       if (success) {
+         setAmount(''); setDescription(''); setNextRunDate('');
+       }
+       return;
     }
 
     if (isSplit && participants.length === 0) {
@@ -141,20 +158,18 @@ export default function Transactions() {
     });
 
     if (success) {
-      setAmount('0.00');
+      setAmount('');
       setDescription('');
       setParticipants([]);
       setIsSplit(false);
-      setNewParticipant('');
       if (isSplit) {
         fetchSplitBalances();
       }
     } else {
-      alert('Failed to save expense. Please verify your fields or check if you are logged in.');
+      alert('Failed to save. Please verify your fields.');
     }
   };
 
-  // Group expenses by date (simplified)
   const groupedExpenses = expenses.reduce((groups, expense) => {
     const date = new Date(expense.date);
     let dateLabel = format(date, 'MMM dd, yyyy');
@@ -169,71 +184,130 @@ export default function Transactions() {
   }, {});
 
   return (
-    <div className="min-h-screen pb-[400px]">
+    <div className="min-h-screen pb-[450px]">
       <div className="p-6">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Transactions</h1>
-        <p className="text-sm text-gray-600 mb-6">Track and manage your daily outflow and income.</p>
-
-        <div className="flex gap-2 mb-8">
-          <button className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl shadow-sm text-xs font-semibold text-gray-700 border border-gray-100">
-            <Calendar size={14} className="text-black" />
-            This Month
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">Ledger</h1>
+            <p className="text-sm text-gray-600">Track and manage your inflow and outflow.</p>
+          </div>
+          <button onClick={exportToCSV} className="bg-primary/10 text-primary p-2 rounded-xl" title="Export CSV">
+            <Download size={20} />
           </button>
         </div>
 
-        {loading && expenses.length === 0 ? (
-          <div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>
-        ) : (
-          <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[5px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
-            {Object.keys(groupedExpenses).map((dateLabel, idx) => (
-              <div key={dateLabel} className="relative z-10 pt-4">
-                <div className="flex items-center mb-3">
-                  <div className={cn("w-2 h-2 rounded-full border-2 border-white absolute left-[1px]", idx === 0 ? "bg-blue-200" : "bg-gray-300")}></div>
-                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-6">{dateLabel}</h3>
-                </div>
-                <div className="space-y-3 ml-6">
-                  {groupedExpenses[dateLabel].map((exp) => (
-                    <ExpenseItem 
-                      key={exp._id}
-                      icon={getCategoryIcon(exp.category)} 
-                      title={exp.description} 
-                      category={exp.category} 
-                      mode={exp.paymentMode} 
-                      amount={`${exp.type === 'income' ? '+' : '-'}${currency.symbol}${exp.amount.toFixed(2)}`} 
-                      isIncome={exp.type === 'income'}
-                      time={format(new Date(exp.date), 'hh:mm a')} 
-                    />
-                  ))}
-                </div>
+        {/* Tab Selector */}
+        <div className="flex mb-6 bg-gray-100 p-1 rounded-xl">
+           <button 
+             onClick={() => setActiveTab('transactions')}
+             className={cn("flex-1 text-sm font-semibold py-2 rounded-lg transition-colors", activeTab === 'transactions' ? 'bg-white shadow text-black' : 'text-gray-500')}
+           >
+             Transactions
+           </button>
+           <button 
+             onClick={() => setActiveTab('recurring')}
+             className={cn("flex-1 text-sm font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1", activeTab === 'recurring' ? 'bg-white shadow text-black' : 'text-gray-500')}
+           >
+             <RefreshCw size={14} /> Recurring
+           </button>
+        </div>
+
+        {activeTab === 'transactions' && (
+          <>
+            <div className="flex gap-2 mb-6 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+               <div className="flex-1">
+                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">From</label>
+                 <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1" />
+               </div>
+               <div className="w-px bg-gray-100 mx-2"></div>
+               <div className="flex-1">
+                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">To</label>
+                 <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1" />
+               </div>
+            </div>
+
+            {loading && expenses.length === 0 ? (
+              <div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>
+            ) : (
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[5px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
+                {Object.keys(groupedExpenses).map((dateLabel, idx) => (
+                  <div key={dateLabel} className="relative z-10 pt-4">
+                    <div className="flex items-center mb-3">
+                      <div className={cn("w-2 h-2 rounded-full border-2 border-white absolute left-[1px]", idx === 0 ? "bg-blue-200" : "bg-gray-300")}></div>
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-6">{dateLabel}</h3>
+                    </div>
+                    <div className="space-y-3 ml-6">
+                      {groupedExpenses[dateLabel].map((exp) => (
+                        <ExpenseItem 
+                          key={exp._id}
+                          icon={getCategoryIcon(exp.category)} 
+                          title={exp.description} 
+                          category={exp.category} 
+                          mode={exp.paymentMode} 
+                          amount={`${exp.type === 'income' ? '+' : '-'}${currency.symbol}${exp.amount.toFixed(2)}`} 
+                          isIncome={exp.type === 'income'}
+                          time={format(new Date(exp.date), 'hh:mm a')} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                
+                {expenses.length === 0 && !loading && (
+                  <div className="text-center text-gray-500 text-sm py-10">No transactions found in this range.</div>
+                )}
               </div>
-            ))}
-            
-            {expenses.length === 0 && !loading && (
-              <div className="text-center text-gray-500 text-sm py-10">No transactions found. Add one below!</div>
             )}
-          </div>
+          </>
+        )}
+
+        {activeTab === 'recurring' && (
+           <div className="space-y-4">
+              {recurringExpenses.length === 0 ? (
+                 <p className="text-center text-gray-500 text-sm py-10">No active recurring expenses.</p>
+              ) : (
+                 recurringExpenses.map(r => (
+                   <div key={r._id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                     <div>
+                       <h3 className="font-bold text-sm">{r.description}</h3>
+                       <p className="text-xs text-gray-500 capitalize">{r.frequency} • Next run: {new Date(r.nextRunDate).toLocaleDateString()}</p>
+                     </div>
+                     <div className="flex items-center gap-3">
+                       <span className="font-bold">{currency.symbol}{r.amount.toFixed(2)}</span>
+                       <button onClick={() => deleteRecurringExpense(r._id)} className="text-red-500 p-1 bg-red-50 rounded-lg hover:bg-red-100">
+                         <Trash2 size={16} />
+                       </button>
+                     </div>
+                   </div>
+                 ))
+              )}
+           </div>
         )}
       </div>
 
       <div className="fixed bottom-[80px] w-full max-w-md px-4 z-40">
         <div className="bg-[#0B101B] rounded-[2rem] p-6 shadow-2xl">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-white font-semibold">New Entry</h3>
-            <div className="flex bg-[#1A2130] rounded-lg p-1">
-              <button 
-                onClick={() => setType('expense')}
-                className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'expense' ? "bg-gray-700 text-white shadow" : "text-gray-400")}
-              >
-                Expense
-              </button>
-              <button 
-                onClick={() => setType('income')}
-                className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'income' ? "bg-green-600 text-white shadow" : "text-gray-400")}
-              >
-                Income
-              </button>
+          {activeTab === 'recurring' ? (
+             <h3 className="text-white font-semibold mb-4 flex items-center gap-2"><RefreshCw size={18} className="text-primary" /> New Recurring Charge</h3>
+          ) : (
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white font-semibold">New Entry</h3>
+              <div className="flex bg-[#1A2130] rounded-lg p-1">
+                <button 
+                  onClick={() => setType('expense')}
+                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'expense' ? "bg-gray-700 text-white shadow" : "text-gray-400")}
+                >
+                  Expense
+                </button>
+                <button 
+                  onClick={() => setType('income')}
+                  className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'income' ? "bg-green-600 text-white shadow" : "text-gray-400")}
+                >
+                  Income
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="flex items-center text-gray-400 text-5xl font-semibold mb-6 border-b border-gray-800 pb-2">
             <span className="mr-2">{currency.symbol}</span>
@@ -253,12 +327,29 @@ export default function Transactions() {
                 type="text" 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Description (e.g., Coffee)" 
+                placeholder="Description (e.g., Netflix)" 
                 className="bg-transparent text-sm text-white outline-none w-full placeholder-gray-500" 
               />
             </div>
             
-            {type === 'expense' && (
+            {activeTab === 'recurring' && (
+              <div className="flex gap-3">
+                 <select value={frequency} onChange={e => setFrequency(e.target.value)} className="flex-1 bg-[#1A2130] text-sm text-gray-200 outline-none p-4 rounded-xl">
+                   <option value="daily">Daily</option>
+                   <option value="weekly">Weekly</option>
+                   <option value="monthly">Monthly</option>
+                   <option value="yearly">Yearly</option>
+                 </select>
+                 <input 
+                   type="date" 
+                   value={nextRunDate} 
+                   onChange={e => setNextRunDate(e.target.value)} 
+                   className="flex-1 bg-[#1A2130] text-sm text-gray-200 outline-none p-4 rounded-xl"
+                 />
+              </div>
+            )}
+
+            {activeTab === 'transactions' && type === 'expense' && (
               <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer ml-1">
                 <input 
                   type="checkbox" 
@@ -270,38 +361,56 @@ export default function Transactions() {
               </label>
             )}
 
-            {isSplit && type === 'expense' && (
-              <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
-                <label className="text-xs font-semibold text-gray-400 block">Involved ({participants.length + 1})</label>
-                
-                <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-[#0B101B] focus-within:border-primary transition-colors">
-                  <input 
-                    type="text" 
-                    value={newParticipant}
-                    onChange={(e) => setNewParticipant(e.target.value)}
-                    onKeyDown={handleAddParticipant}
-                    placeholder="Add friend's name... (Press Enter)"
-                    className="w-full text-sm outline-none bg-transparent text-white placeholder-gray-600"
-                  />
-                  <button onClick={handleAddParticipant} className="p-1 text-primary rounded outline-none w-6 h-6 flex items-center justify-center hover:bg-gray-800">
-                    <Plus size={16} />
-                  </button>
-                </div>
+            {activeTab === 'transactions' && isSplit && type === 'expense' && (
+               <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
+                 <label className="text-xs font-semibold text-gray-400 block">Involved ({participants.length + 1})</label>
+                 
+                 <div className="flex gap-2">
+                    <select 
+                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors"
+                      onChange={(e) => {
+                        if (e.target.value === "") return;
+                        const group = groups.find(g => g._id === e.target.value);
+                        if (group) {
+                          const memberNames = group.members.filter(m => typeof m === 'object' ? m._id !== user._id : m !== user._id).map(m => m.name || m);
+                          const uniqueMembers = [...new Set([...participants, ...memberNames])];
+                          setParticipants(uniqueMembers);
+                        }
+                        e.target.value = "";
+                      }}
+                    >
+                      <option value="">+ Group...</option>
+                      {groups.map(g => <option key={g._id} value={g._id}>{g.name}</option>)}
+                    </select>
 
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
-                    <span className="text-xs font-medium">You</span>
-                  </div>
-                  {participants.map((p, i) => (
-                    <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-full group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10 transition-colors">
-                      <span className="text-xs font-medium text-gray-300">{p}</span>
-                      <button onClick={() => removeParticipant(p)} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    <select 
+                      className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors"
+                      onChange={(e) => {
+                        if (e.target.value === "") return;
+                        const name = e.target.value;
+                        if (!participants.includes(name)) setParticipants([...participants, name]);
+                        e.target.value = "";
+                      }}
+                    >
+                      <option value="">+ Friend...</option>
+                      {friends.map(f => <option key={f._id} value={f.name}>{f.name}</option>)}
+                    </select>
+                 </div>
+
+                 <div className="flex flex-wrap gap-2 pt-1">
+                   <div className="flex items-center gap-2 bg-primary/20 text-primary px-3 py-1.5 rounded-full border border-primary/30">
+                     <span className="text-xs font-medium">You</span>
+                   </div>
+                   {participants.map((p, i) => (
+                     <div key={i} className="flex items-center gap-1 bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-full group cursor-pointer hover:border-red-500/50 hover:bg-red-500/10 transition-colors">
+                       <span className="text-xs font-medium text-gray-300">{p}</span>
+                       <button onClick={() => { setParticipants(participants.filter(x => x !== p)) }} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+                         &times;
+                       </button>
+                     </div>
+                   ))}
+                 </div>
+               </div>
             )}
 
             <div className="flex gap-3">
@@ -320,11 +429,10 @@ export default function Transactions() {
               <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary transition-all">
                 <select 
                   value={paymentMode} 
-                  onChange={handlePaymentChange} 
+                  onChange={e => setPaymentMode(e.target.value)} 
                   className="w-full h-full absolute inset-0 opacity-0 cursor-pointer"
                 >
                   {paymentModes.map(mode => <option key={mode} value={mode}>{mode}</option>)}
-                  <option value="ADD_NEW">+ Add New...</option>
                 </select>
                 <span className="text-sm font-medium text-gray-200 truncate pr-2">{paymentMode}</span>
                 <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
@@ -337,7 +445,7 @@ export default function Transactions() {
             disabled={loading}
             className={cn("w-full text-white font-semibold py-4 rounded-xl mt-6 shadow-lg disabled:opacity-50 transition-colors", type === 'income' ? 'bg-green-600 hover:bg-green-500' : 'bg-primary')}
           >
-            {loading ? 'Saving...' : `Save ${type === 'income' ? 'Income' : 'Expense'}`}
+            {loading ? 'Saving...' : (activeTab === 'recurring' ? 'Start Recurring Charge' : `Save ${type === 'income' ? 'Income' : 'Expense'}`)}
           </button>
         </div>
       </div>
