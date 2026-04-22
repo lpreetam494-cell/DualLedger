@@ -114,7 +114,7 @@ export default function Transactions() {
   };
 
   const handleSaveExpense = async () => {
-    if (!amount || amount === '0.00' || !description) {
+    if (!amount || parseFloat(amount) <= 0 || !description) {
       alert('Please enter a valid amount and description.');
       return;
     }
@@ -185,7 +185,7 @@ export default function Transactions() {
   }, {});
 
   return (
-    <div className="min-h-screen pb-[450px]">
+    <div className="min-h-screen pb-[200px]">
       <div className="p-6">
         <div className="flex justify-between items-start mb-6">
           <div>

@@ -22,7 +22,7 @@ export default function Home() {
 
   const totalSpent = insights?.totalSpent || 0;
   const currentBalance = insights?.currentBalance || 0;
-  const totalIncome = totalSpent + currentBalance;
+  const totalIncome = insights?.totalIncome || 0;
   const categories = insights?.categories || [];
   const dayTrends = insights?.dayTrends || [];
 
