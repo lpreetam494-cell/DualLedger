@@ -324,7 +324,8 @@ export default function Transactions() {
           />
 
           {/* Sheet */}
-          <div className="fixed bottom-0 left-0 right-0 z-[60] max-w-md mx-auto bg-[#0B101B] rounded-t-[2rem] p-6 shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto pb-12">
+          {/* Sheet */}
+          <div className="fixed bottom-0 left-0 right-0 z-[100] max-w-md mx-auto bg-[#0B101B] rounded-t-[2rem] p-6 shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto pb-32">
             {/* Header */}
             {activeTab === 'recurring' ? (
               <div className="flex justify-between items-center mb-4">

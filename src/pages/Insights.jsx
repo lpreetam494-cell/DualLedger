@@ -40,7 +40,7 @@ export default function Insights() {
   const COLORS = ['#0052FF', '#00C2FF', '#818CF8', '#C084FC', '#F472B6'];
 
   return (
-    <div className="p-6 space-y-6 pb-24">
+    <div className="p-6 space-y-6 pb-32">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight mb-4">Analytics</h1>
         <p className="text-gray-500 text-sm">Understand your spending habits.</p>

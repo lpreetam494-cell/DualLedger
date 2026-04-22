@@ -55,7 +55,7 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 pb-32">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">

@@ -56,7 +56,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-6 space-y-6 min-h-screen dark:bg-[#0B101B]">
+    <div className="p-6 space-y-6 min-h-screen dark:bg-[#0B101B] pb-32">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm border border-gray-200 dark:border-gray-800">

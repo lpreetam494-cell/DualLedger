@@ -53,7 +53,7 @@ export default function Social() {
   };
 
   return (
-    <div className="p-6 space-y-8 pb-24">
+    <div className="p-6 space-y-8 pb-32">
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight mb-2">Social</h1>
         <p className="text-gray-500 text-sm">Connect and manage groups.</p>
