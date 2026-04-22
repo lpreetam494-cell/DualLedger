@@ -164,9 +164,9 @@ export default function Transactions() {
       setDescription('');
       setParticipants([]);
       setIsSplit(false);
-      if (isSplit) {
-        fetchSplitBalances();
-      }
+      setNewParticipant('');
+      setIsFormOpen(false); // ✅ close modal after successful save
+      if (isSplit) fetchSplitBalances();
     } else {
       alert('Failed to save. Please verify your fields.');
     }
@@ -218,15 +218,15 @@ export default function Transactions() {
 
         {activeTab === 'transactions' && (
           <>
-            <div className="flex gap-2 mb-6 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex gap-2 mb-6 bg-white dark:bg-[#1A2130] p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
                <div className="flex-1">
                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">From</label>
-                 <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1" />
+                 <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1 dark:text-white dark:colorscheme-dark" />
                </div>
-               <div className="w-px bg-gray-100 mx-2"></div>
+               <div className="w-px bg-gray-100 dark:bg-gray-700 mx-2"></div>
                <div className="flex-1">
                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">To</label>
-                 <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1" />
+                 <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1 dark:text-white dark:colorscheme-dark" />
                </div>
             </div>
 
@@ -279,7 +279,7 @@ export default function Transactions() {
                  <p className="text-center text-gray-500 text-sm py-10">No active recurring expenses.</p>
               ) : (
                  recurringExpenses.map(r => (
-                   <div key={r._id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+                   <div key={r._id} className="bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center">
                      <div>
                        <h3 className="font-bold text-sm">{r.description}</h3>
                        <p className="text-xs text-gray-500 capitalize">{r.frequency} • Next run: {new Date(r.nextRunDate).toLocaleDateString()}</p>
@@ -312,7 +312,15 @@ export default function Transactions() {
           {/* Backdrop */}
           <div
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsFormOpen(false)}
+            onClick={() => {
+              setIsFormOpen(false);
+              // Reset form state when dismissed via backdrop
+              setAmount('');
+              setDescription('');
+              setParticipants([]);
+              setIsSplit(false);
+              setNewParticipant('');
+            }}
           />
 
           {/* Sheet */}
@@ -441,10 +449,7 @@ export default function Transactions() {
             </div>
 
             <button
-              onClick={async () => {
-                const ok = await handleSaveExpense();
-                // handleSaveExpense returns undefined but closes on success via state reset
-              }}
+              onClick={handleSaveExpense}
               disabled={loading}
               className={cn("w-full text-white font-semibold py-4 rounded-xl mt-6 shadow-lg disabled:opacity-50 transition-colors", type === 'income' ? 'bg-green-600 hover:bg-green-500' : 'bg-primary')}
             >
