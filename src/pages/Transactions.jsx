@@ -20,7 +20,7 @@ const getCategoryIcon = (category) => {
 };
 
 export default function Transactions() {
-  const { user, expenses, fetchExpenses, addExpense, loading, currency, updatePreferences, fetchSplitBalances, groups, friends, fetchGroups, fetchFriends, recurringExpenses, fetchRecurringExpenses, addRecurringExpense, deleteRecurringExpense } = useStore();
+  const { user, expenses, fetchExpenses, addExpense, deleteExpense, loading, currency, updatePreferences, fetchSplitBalances, groups, friends, fetchGroups, fetchFriends, recurringExpenses, fetchRecurringExpenses, addRecurringExpense, deleteRecurringExpense } = useStore();
   
   const [activeTab, setActiveTab] = useState('transactions'); // 'transactions' or 'recurring'
   const [type, setType] = useState('expense');
@@ -247,7 +247,15 @@ export default function Transactions() {
                           mode={exp.paymentMode} 
                           amount={`${exp.type === 'income' ? '+' : '-'}${currency.symbol}${exp.amount.toFixed(2)}`} 
                           isIncome={exp.type === 'income'}
-                          time={format(new Date(exp.date), 'hh:mm a')} 
+                          isSplit={exp.isSplit}
+                          time={format(new Date(exp.date), 'hh:mm a')}
+                          onDelete={async () => {
+                            if (window.confirm(`Delete "${exp.description}"?${exp.isSplit ? '\n\nThis is a split expense — removing it will update balances for all participants.' : ''}`))
+                            {
+                              const ok = await deleteExpense(exp._id);
+                              if (ok && exp.isSplit) fetchSplitBalances();
+                            }
+                          }}
                         />
                       ))}
                     </div>
@@ -502,25 +510,41 @@ export default function Transactions() {
   );
 }
 
-function ExpenseItem({ icon: Icon, title, category, mode, amount, time, isIncome }) {
+function ExpenseItem({ icon: Icon, title, category, mode, amount, time, isIncome, isSplit, onDelete }) {
   return (
-    <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-          <Icon size={20} className="text-gray-800" />
+    <div className="group flex items-center justify-between bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm hover:shadow-md transition-all">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+          <Icon size={18} className="text-gray-700 dark:text-gray-300" />
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
-          <div className="flex items-center gap-1 text-[10px] text-gray-500">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h4>
+            {isSplit && (
+              <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">Split</span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400">
             <span>{category}</span>
             <span className="w-1 h-1 bg-gray-300 rounded-full mx-1"></span>
             <span>{mode}</span>
           </div>
         </div>
       </div>
-      <div className="text-right">
-        <span className={cn("block text-sm font-bold", isIncome ? "text-green-600" : "text-gray-900")}>{amount}</span>
-        <span className="text-[10px] text-gray-500">{time}</span>
+      <div className="flex items-center gap-3">
+        <div className="text-right">
+          <span className={cn("block text-sm font-bold", isIncome ? "text-green-600" : "text-gray-900 dark:text-white")}>{amount}</span>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400">{time}</span>
+        </div>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 flex-shrink-0"
+            title="Delete transaction"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
       </div>
     </div>
   );

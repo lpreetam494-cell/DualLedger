@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, Banknote, Utensils, ShoppingBag, Plus } from 'lucide-react';
+import { Bell, Plus, Trash2 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -9,7 +9,7 @@ function cn(...inputs) {
 }
 
 export default function Split() {
-  const { splitBalances, fetchSplitBalances, addExpense, loading, currency, user, toggleNotifications, updatePreferences, groups, friends, fetchGroups, fetchFriends } = useStore();
+  const { splitBalances, fetchSplitBalances, addExpense, deleteExpense, expenses, fetchExpenses, loading, currency, user, toggleNotifications, updatePreferences, groups, friends, fetchGroups, fetchFriends } = useStore();
   
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('0.00');
@@ -36,9 +36,10 @@ export default function Split() {
 
   useEffect(() => {
     fetchSplitBalances();
+    fetchExpenses();
     fetchGroups();
     fetchFriends();
-  }, [fetchSplitBalances, fetchGroups, fetchFriends]);
+  }, [fetchSplitBalances, fetchExpenses, fetchGroups, fetchFriends]);
 
   const handleSaveSplit = async () => {
     if (!desc || amount === '0.00' || participants.length === 0) {
@@ -136,6 +137,37 @@ export default function Split() {
           )}
         </div>
       </div>
+
+      {/* Split Expense History */}
+      {expenses.filter(e => e.isSplit).length > 0 && (
+        <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-sm transition-colors">
+          <h3 className="font-bold mb-4 dark:text-white text-sm">Your Split Expenses</h3>
+          <div className="space-y-2">
+            {expenses.filter(e => e.isSplit).map(exp => (
+              <div key={exp._id} className="group flex items-center justify-between py-2.5 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                <div>
+                  <p className="text-sm font-semibold dark:text-white">{exp.description}</p>
+                  <p className="text-[10px] text-gray-500">
+                    {exp.splitDetails?.length} split{exp.splitDetails?.length !== 1 ? 's' : ''} &bull; {currency.symbol}{exp.amount.toFixed(2)} total
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (window.confirm(`Delete "${exp.description}"?\n\nRemoving this split will update balances for all participants.`)) {
+                      const ok = await deleteExpense(exp._id);
+                      if (ok) fetchSplitBalances();
+                    }
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+                  title="Delete split"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-sm transition-colors">
         <h3 className="font-bold mb-4 dark:text-white">Add Split Expense</h3>

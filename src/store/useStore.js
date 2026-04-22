@@ -96,6 +96,17 @@ export const useStore = create((set) => ({
     }
   },
 
+  deleteExpense: async (id) => {
+    try {
+      await axios.delete(`${API_URL}/expenses/${id}`);
+      set((state) => ({ expenses: state.expenses.filter(e => e._id !== id) }));
+      return true;
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+      return false;
+    }
+  },
+
   fetchInsights: async (startDate, endDate) => {
     set({ loading: true, error: null });
     try {
