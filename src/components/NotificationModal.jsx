@@ -70,7 +70,7 @@ export default function NotificationModal() {
             notifications.map(n => (
               <div 
                 key={n._id} 
-                className={`p-4 rounded-xl border flex gap-3 ${n.isRead ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800'}`}
+                className={`p-4 rounded-xl border flex gap-3 ${n.isRead ? 'bg-gray-50 dark:bg-[#0B101B] border-gray-100 dark:border-gray-800 opacity-60' : 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800'}`}
               >
                 <div className="mt-0.5">
                   {getIcon(n.type)}

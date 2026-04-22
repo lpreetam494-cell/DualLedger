@@ -156,15 +156,26 @@ export const getInsights = async (req, res) => {
 
     const totalOverall = categoryStats.reduce((acc, curr) => acc + curr.totalSpent, 0);
 
-    // Calculate Total Income
-    const incomeStats = await Expense.aggregate([
-      { $match: matchIncome },
-      { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
+    // Calculate All-time Totals for Current Balance
+    const allTimeExpenses = await Expense.aggregate([
+      { $match: { userId } },
+      { 
+        $group: { 
+          _id: '$type', 
+          total: { $sum: '$amount' } 
+        } 
+      }
     ]);
-    const totalIncome = incomeStats.length > 0 ? incomeStats[0].totalIncome : 0;
-    
-    // Calculate Current Balance
-    const currentBalance = totalIncome - totalOverall;
+
+    let totalIncomeAllTime = 0;
+    let totalSpentAllTime = 0;
+
+    allTimeExpenses.forEach(stat => {
+      if (stat._id === 'income') totalIncomeAllTime = stat.total;
+      else totalSpentAllTime = stat.total;
+    });
+
+    const currentBalance = totalIncomeAllTime - totalSpentAllTime;
 
     // Map Mongo dayOfWeek (1=Sun, 2=Mon, etc.) to String
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -173,9 +184,16 @@ export const getInsights = async (req, res) => {
       peakDay = days[dayTrends[0]._id - 1];
     }
 
+    // Calculate filtered income for the selected range
+    const incomeStats = await Expense.aggregate([
+      { $match: matchIncome },
+      { $group: { _id: null, totalIncome: { $sum: '$amount' } } }
+    ]);
+    const totalIncomeInRange = incomeStats.length > 0 ? incomeStats[0].totalIncome : 0;
+
     res.json({
       totalSpent: totalOverall,
-      totalIncome: totalIncome,
+      totalIncome: totalIncomeInRange,
       currentBalance: currentBalance,
       categories: categoryStats,
       peakSpendingDay: peakDay,

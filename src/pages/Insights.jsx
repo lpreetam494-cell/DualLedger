@@ -40,17 +40,17 @@ export default function Insights() {
   const COLORS = ['#0052FF', '#00C2FF', '#818CF8', '#C084FC', '#F472B6'];
 
   return (
-    <div className="p-6 space-y-6 pb-32">
+    <div className="p-6 space-y-6 pb-32 dark:bg-[#0B101B]">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-4">Analytics</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight mb-4 dark:text-white">Analytics</h1>
         <p className="text-gray-500 text-sm">Understand your spending habits.</p>
       </div>
 
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm">
+      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-sm border border-transparent dark:border-gray-800">
         <div className="flex justify-between items-start mb-6">
           <div>
             <p className="text-xs text-gray-500 mb-1 font-bold tracking-wider uppercase">Total Spent (Current Cycle)</p>
-            <h2 className="text-3xl font-bold">{currency.symbol}{totalSpent.toFixed(2)}</h2>
+            <h2 className="text-3xl font-bold dark:text-white">{currency.symbol}{totalSpent.toFixed(2)}</h2>
           </div>
           <button className="text-gray-400">
             <MoreHorizontal size={20} />
@@ -71,7 +71,8 @@ export default function Insights() {
                 </Bar>
                 <Tooltip 
                   cursor={{fill: 'transparent'}}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#1A2130', color: '#fff' }}
+                  itemStyle={{ color: '#fff' }}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -80,11 +81,11 @@ export default function Insights() {
       </div>
 
       {/* Category Breakdown & Limits */}
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm">
+      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-sm border border-transparent dark:border-gray-800">
          <div className="flex justify-between items-center mb-4">
            <div className="flex items-center gap-2">
              <PieChartIcon size={20} className="text-primary" />
-             <h3 className="font-bold">Top Categories</h3>
+             <h3 className="font-bold dark:text-white">Top Categories</h3>
            </div>
            {Object.keys(budgets).length > 0 && <Activity size={16} className="text-red-400" />}
          </div>
@@ -111,7 +112,8 @@ export default function Insights() {
                     </Pie>
                     <Tooltip 
                       formatter={(value) => `${currency.symbol}${value.toFixed(2)}`}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: '#1A2130', color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
                     />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
                   </PieChart>

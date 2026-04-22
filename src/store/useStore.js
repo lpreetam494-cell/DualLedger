@@ -8,7 +8,7 @@ if (storedUser && storedUser.token) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${storedUser.token}`;
 }
 
-export const useStore = create((set) => ({
+export const useStore = create((set, get) => ({
   user: storedUser || null,
   expenses: [],
   insights: null,
@@ -100,6 +100,9 @@ export const useStore = create((set) => ({
     try {
       await axios.delete(`${API_URL}/expenses/${id}`);
       set((state) => ({ expenses: state.expenses.filter(e => e._id !== id) }));
+      // Re-fetch totals to keep UI in sync
+      get().fetchInsights();
+      get().fetchSplitBalances();
       return true;
     } catch (error) {
       console.error('Failed to delete expense:', error);

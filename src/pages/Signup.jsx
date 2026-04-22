@@ -32,7 +32,7 @@ export default function Signup() {
         </h1>
       </div>
       <div className="w-full max-w-sm bg-white dark:bg-[#131B2B] p-6 rounded-2xl shadow-xl">
-        <h2 className="text-xl font-semibold mb-6 flex justify-center">Sign Up</h2>
+        <h2 className="text-xl font-semibold mb-6 flex justify-center dark:text-white">Sign Up</h2>
         {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

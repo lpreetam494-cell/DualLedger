@@ -53,9 +53,9 @@ export default function Social() {
   };
 
   return (
-    <div className="p-6 space-y-8 pb-32">
+    <div className="p-6 space-y-8 pb-32 dark:bg-[#0B101B]">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-2">Social</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2 dark:text-white">Social</h1>
         <p className="text-gray-500 text-sm">Connect and manage groups.</p>
       </div>
 
@@ -64,9 +64,9 @@ export default function Social() {
         <div className="space-y-3">
           <h2 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Pending Requests</h2>
           {pendingRequests.map(req => (
-            <div key={req._id} className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between">
+            <div key={req._id} className="bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm flex items-center justify-between border border-transparent dark:border-gray-800">
               <div>
-                <p className="font-bold">{req.name}</p>
+                <p className="font-bold dark:text-white">{req.name}</p>
                 <p className="text-xs text-gray-500">{req.email}</p>
               </div>
               <div className="flex gap-2">
@@ -93,7 +93,7 @@ export default function Social() {
               placeholder="Search by email..." 
               value={searchEmail}
               onChange={(e) => setSearchEmail(e.target.value)}
-              className="w-full bg-white pl-10 pr-4 py-3 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+              className="w-full bg-white dark:bg-[#1A2130] pl-10 pr-4 py-3 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm dark:text-white border border-transparent dark:border-gray-800"
             />
           </div>
           <button type="submit" className="bg-primary text-white px-4 py-3 rounded-2xl font-bold shadow-sm">
@@ -104,11 +104,11 @@ export default function Social() {
         {searchResults.length > 0 && (
           <div className="space-y-2 mt-4">
              {searchResults.map(u => (
-               <div key={u._id} className="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between transition-opacity">
-                 <div>
-                   <p className="font-bold text-sm">{u.name}</p>
-                   <p className="text-xs text-gray-500">{u.email}</p>
-                 </div>
+                <div key={u._id} className="bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm flex items-center justify-between transition-opacity border border-transparent dark:border-gray-800">
+                  <div>
+                    <p className="font-bold text-sm dark:text-white">{u.name}</p>
+                    <p className="text-xs text-gray-500">{u.email}</p>
+                  </div>
                  <button onClick={() => handleSendRequest(u._id)} className="text-primary bg-primary/10 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1">
                    <UserPlus size={14} /> Add
                  </button>
@@ -127,10 +127,10 @@ export default function Social() {
           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
             {friends.map(f => (
               <div key={f._id} className="flex-shrink-0 w-20 text-center">
-                <div className="w-14 h-14 mx-auto bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xl mb-2">
+                <div className="w-14 h-14 mx-auto bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xl mb-2 dark:bg-primary/20">
                   {f.name.charAt(0).toUpperCase()}
                 </div>
-                <p className="text-xs font-medium truncate">{f.name.split(' ')[0]}</p>
+                <p className="text-xs font-medium truncate dark:text-gray-300">{f.name.split(' ')[0]}</p>
               </div>
             ))}
           </div>
@@ -144,13 +144,13 @@ export default function Social() {
         {/* Existing Groups */}
         <div className="space-y-2">
           {groups.map(g => (
-            <div key={g._id} className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm flex items-center justify-between">
+            <div key={g._id} className="bg-white dark:bg-[#1A2130] border border-gray-100 dark:border-gray-800 p-4 rounded-2xl shadow-sm flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#E5EDFF] text-primary rounded-xl flex justify-center items-center font-bold">
+                <div className="w-10 h-10 bg-[#E5EDFF] dark:bg-primary/20 text-primary rounded-xl flex justify-center items-center font-bold">
                   <UsersIcon size={18} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm">{g.name}</h3>
+                  <h3 className="font-bold text-sm dark:text-white">{g.name}</h3>
                   <p className="text-xs text-gray-500">{g.members.length} members</p>
                 </div>
               </div>
@@ -159,14 +159,14 @@ export default function Social() {
         </div>
 
         {/* Create Group */}
-        <div className="bg-gray-100 border border-gray-200 border-dashed rounded-3xl p-5 mt-4 space-y-4">
-          <h3 className="font-bold text-sm">Create New Group</h3>
+        <div className="bg-gray-100 dark:bg-[#1A2130] border border-gray-200 dark:border-gray-800 border-dashed rounded-3xl p-5 mt-4 space-y-4">
+          <h3 className="font-bold text-sm dark:text-white">Create New Group</h3>
           <input 
             type="text" 
             placeholder="Trip to Paris..." 
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
-            className="w-full bg-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm shadow-sm"
+            className="w-full bg-white dark:bg-[#0B101B] px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm shadow-sm dark:text-white border border-transparent dark:border-gray-800"
           />
           {friends.length > 0 && (
              <div>
