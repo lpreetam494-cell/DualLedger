@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, Banknote, Moon, Shield, ChevronRight, Download, X } from 'lucide-react';
+import { Bell, User, Banknote, Moon, Shield, ChevronRight, Download, X, Activity, PieChart } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -11,9 +11,11 @@ function cn(...inputs) {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { theme, toggleTheme, expenses, currency, setCurrency, user, logout, toggleNotifications } = useStore();
+  const { theme, toggleTheme, expenses, currency, setCurrency, user, logout, toggleNotifications, updatePreferences } = useStore();
   const [infoOpen, setInfoOpen] = useState(false);
   const [securityOpen, setSecurityOpen] = useState(false);
+  const [budgetsOpen, setBudgetsOpen] = useState(false);
+  const [localBudgets, setLocalBudgets] = useState({});
 
   const handleCurrencyToggle = () => {
     const currencies = [
@@ -37,9 +39,9 @@ export default function Profile() {
     expenses.forEach(exp => {
       const row = [
         new Date(exp.date).toLocaleDateString(),
-        `"${exp.description}"`,
-        `"${exp.category}"`,
-        `"${exp.paymentMode}"`,
+        `"${(exp.description || '').replace(/"/g, '""')}"`,
+        `"${(exp.category || '').replace(/"/g, '""')}"`,
+        `"${(exp.paymentMode || '').replace(/"/g, '""')}"`,
         exp.amount,
         exp.isSplit ? 'Yes' : 'No'
       ];
@@ -121,6 +123,24 @@ export default function Profile() {
         </div>
       </div>
 
+      <div>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-4">PLANNING</p>
+        <div className="bg-white dark:bg-[#1A2130] rounded-3xl shadow-sm overflow-hidden transition-colors">
+          <SettingItem 
+            icon={Activity} 
+            title="Category Budgets" 
+            subtitle="Set spending limits" 
+            hasArrow 
+            cursor="pointer" 
+            onClick={() => {
+              const currentBudgets = user?.preferences?.budgets || {};
+              setLocalBudgets(currentBudgets);
+              setBudgetsOpen(true);
+            }} 
+          />
+        </div>
+      </div>
+
       <div className="pt-2">
         <button 
           onClick={() => { logout(); navigate('/login'); }}
@@ -158,24 +178,42 @@ export default function Profile() {
         </div>
       )}
 
-      {securityOpen && (
+      {budgetsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSecurityOpen(false)}></div>
-          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setBudgetsOpen(false)}></div>
+          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all flex flex-col max-h-[80vh]">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-              <h2 className="text-xl font-bold dark:text-white">Security & Privacy</h2>
-              <button onClick={() => setSecurityOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>
+              <h2 className="text-xl font-bold dark:text-white">Category Budgets</h2>
+              <button onClick={() => setBudgetsOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <Shield className="text-green-500" size={24} />
-                <div>
-                  <h3 className="font-bold text-sm dark:text-white">Account Secured</h3>
-                  <p className="text-xs text-gray-500">Your details are encrypted with JWT & proper hashing protocols.</p>
+            <div className="p-6 space-y-4 overflow-y-auto no-scrollbar flex-1">
+              <p className="text-xs text-gray-500 mb-2">Set monthly spending limits for your expense categories. 0 means no limit.</p>
+              {(user?.preferences?.expenseCategories || ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment']).map(cat => (
+                <div key={cat} className="flex items-center justify-between gap-4">
+                  <label className="text-sm font-medium dark:text-gray-200 truncate flex-1">{cat}</label>
+                  <div className="flex items-center bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 px-3 py-2 w-32">
+                    <span className="text-gray-400 text-xs mr-1">{currency.symbol}</span>
+                    <input 
+                      type="number" 
+                      value={localBudgets[cat] || ''} 
+                      onChange={(e) => setLocalBudgets({...localBudgets, [cat]: parseFloat(e.target.value) || 0})}
+                      placeholder="0"
+                      className="w-full bg-transparent text-sm outline-none dark:text-white"
+                    />
+                  </div>
                 </div>
-              </div>
-              <button className="w-full py-3 bg-red-50 dark:bg-red-900/20 text-red-600 font-semibold rounded-xl">Change Password</button>
-              <button className="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold rounded-xl">Enable 2FA (Coming Soon)</button>
+              ))}
+            </div>
+            <div className="p-6 border-t border-gray-100 dark:border-gray-800">
+              <button 
+                onClick={async () => {
+                  const success = await updatePreferences({ budgets: localBudgets });
+                  if (success) setBudgetsOpen(false);
+                }}
+                className="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20"
+              >
+                Save Budgets
+              </button>
             </div>
           </div>
         </div>

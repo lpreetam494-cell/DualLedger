@@ -66,7 +66,7 @@ export default function Insights() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 500 }} tickFormatter={(value) => `${currency.symbol}${value}`} dx={-10} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={24}>
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.name === peakDay.substring(0,3) ? '#0052FF' : '#E5E7EB'} />
+                    <Cell key={`cell-${index}`} fill={entry.name === peakDay.substring(0,3) ? '#0052FF' : (localStorage.getItem('theme') === 'dark' ? '#374151' : '#E5E7EB')} />
                   ))}
                 </Bar>
                 <Tooltip 
@@ -135,12 +135,12 @@ export default function Insights() {
                  return (
                     <div key={data.name}>
                       <div className="flex justify-between text-xs mb-1.5">
-                        <span className="font-semibold text-gray-700">{data.name} Limit</span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">{data.name} Limit</span>
                         <span className={`font-semibold ${isOver ? 'text-red-500' : 'text-gray-500'}`}>
                            {currency.symbol}{data.value.toFixed(0)} / {currency.symbol}{budget}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner">
+                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden shadow-inner">
                         <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${Math.min(percent, 100)}%` }}></div>
                       </div>
                     </div>

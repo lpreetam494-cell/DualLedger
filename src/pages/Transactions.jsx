@@ -44,9 +44,9 @@ export default function Transactions() {
   const [selectedGroup, setSelectedGroup] = useState('');
   const savedGroups = user?.preferences?.groups || [];
 
-  const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment'];
-  const defaultIncomeCategories = ['Salary', 'Freelance', 'Investments', 'Gift'];
-  const defaultPaymentModes = ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer'];
+  const defaultExpenseCategories = ['Food & Dining', 'Transportation', 'Groceries', 'Housing', 'Entertainment', 'Shopping', 'Health', 'Bills'];
+  const defaultIncomeCategories = ['Salary', 'Bonus', 'Freelance', 'Investments', 'Gift', 'Rental', 'Interest'];
+  const defaultPaymentModes = ['Bank Transfer', 'Cash', 'UPI', 'Cheque', 'Credit Card', 'Debit Card'];
 
   const expenseCategories = user?.preferences?.expenseCategories || defaultExpenseCategories;
   const incomeCategories = user?.preferences?.incomeCategories || defaultIncomeCategories;
@@ -67,6 +67,11 @@ export default function Transactions() {
   }, [user?.preferences?.paymentModes]);
 
   useEffect(() => {
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      alert("End date cannot be before start date.");
+      setEndDate(startDate);
+      return;
+    }
     fetchExpenses(startDate, endDate);
   }, [startDate, endDate, fetchExpenses]);
 
@@ -81,17 +86,32 @@ export default function Transactions() {
     if (val === 'ADD_NEW') {
       const newCat = prompt("Enter new category name:");
       if (newCat && newCat.trim()) {
+        const trimmed = newCat.trim();
         const catList = type === 'expense' ? expenseCategories : incomeCategories;
         const key = type === 'expense' ? 'expenseCategories' : 'incomeCategories';
-        if (!catList.includes(newCat.trim())) {
-          await updatePreferences({ [key]: [...catList, newCat.trim()] });
+        if (!catList.includes(trimmed)) {
+          await updatePreferences({ [key]: [...catList, trimmed] });
         }
-        setCategory(newCat.trim());
-      } else {
-        setCategory(currentCategories[0]);
+        setCategory(trimmed);
       }
     } else {
       setCategory(val);
+    }
+  };
+
+  const handlePaymentModeChange = async (e) => {
+    const val = e.target.value;
+    if (val === 'ADD_NEW') {
+      const newMode = prompt("Enter new payment mode:");
+      if (newMode && newMode.trim()) {
+        const trimmed = newMode.trim();
+        if (!paymentModes.includes(trimmed)) {
+          await updatePreferences({ paymentModes: [...paymentModes, trimmed] });
+        }
+        setPaymentMode(trimmed);
+      }
+    } else {
+      setPaymentMode(val);
     }
   };
 
@@ -190,7 +210,7 @@ export default function Transactions() {
       <div className="p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight mb-2">Ledger</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2 dark:text-white">Ledger</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">Track and manage your inflow and outflow.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -433,15 +453,16 @@ export default function Transactions() {
               <div className="flex gap-3">
                 <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary">
                   <select value={category} onChange={handleCategoryChange} className="w-full h-full absolute inset-0 opacity-0 cursor-pointer">
-                    {currentCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    <option value="ADD_NEW">+ Add New...</option>
+                    {currentCategories.map(cat => <option key={cat} value={cat} className="bg-[#0B101B]">{cat}</option>)}
+                    <option value="ADD_NEW" className="bg-[#0B101B]">+ Add New...</option>
                   </select>
                   <span className="text-sm font-medium text-gray-200 truncate pr-2">{category}</span>
                   <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
                 </div>
                 <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary">
-                  <select value={paymentMode} onChange={e => setPaymentMode(e.target.value)} className="w-full h-full absolute inset-0 opacity-0 cursor-pointer">
-                    {paymentModes.map(mode => <option key={mode} value={mode}>{mode}</option>)}
+                  <select value={paymentMode} onChange={handlePaymentModeChange} className="w-full h-full absolute inset-0 opacity-0 cursor-pointer">
+                    {paymentModes.map(mode => <option key={mode} value={mode} className="bg-[#0B101B]">{mode}</option>)}
+                    <option value="ADD_NEW" className="bg-[#0B101B]">+ Add New...</option>
                   </select>
                   <span className="text-sm font-medium text-gray-200 truncate pr-2">{paymentMode}</span>
                   <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />

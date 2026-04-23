@@ -1,4 +1,5 @@
 import Expense from '../models/Expense.js';
+import User from '../models/User.js';
 
 // @desc    Get simplified debts for the group
 // @route   GET /api/splits/balances
@@ -78,9 +79,25 @@ export const getSplitBalances = async (req, res) => {
       if (creditor.amount < 0.01) c++;
     }
 
+    // 4. Resolve IDs to names for display
+    const allUsers = [...new Set([...Object.keys(balances)])];
+    const userMap = {};
+    
+    // Find real users and map their IDs to names
+    const realUsers = await User.find({ _id: { $in: allUsers.filter(id => id.match(/^[0-9a-fA-F]{24}$/)) } }).select('name');
+    realUsers.forEach(u => {
+      userMap[u._id.toString()] = u.name;
+    });
+
+    const settlementsWithNames = settlements.map(s => ({
+      from: userMap[s.from] || s.from,
+      to: userMap[s.to] || s.to,
+      amount: s.amount
+    }));
+
     res.json({
       netBalances: balances,
-      settlements
+      settlements: settlementsWithNames
     });
 
   } catch (error) {

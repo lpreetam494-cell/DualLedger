@@ -42,8 +42,8 @@ export default function Split() {
   }, [fetchSplitBalances, fetchExpenses, fetchGroups, fetchFriends]);
 
   const handleSaveSplit = async () => {
-    if (!desc || amount === '0.00' || participants.length === 0) {
-      alert("Please enter a description, a valid amount, and add at least one participant to split with.");
+    if (!desc || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0 || participants.length === 0) {
+      alert("Please enter a description, a valid positive amount, and add at least one participant to split with.");
       return;
     }
     

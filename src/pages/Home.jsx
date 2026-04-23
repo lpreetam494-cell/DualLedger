@@ -61,7 +61,7 @@ export default function Home() {
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <h1 className="text-xl font-bold dark:text-white">DualLedger</h1>
+        <h1 className="text-xl font-bold dark:text-white">DualLedger</h1>
         </div>
         <div className="flex items-center gap-2">
           <select 
@@ -132,7 +132,14 @@ export default function Home() {
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
-                <Line type="monotone" dataKey="value" stroke="#000" strokeWidth={2} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6, fill: '#000' }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke={localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000'} 
+                  strokeWidth={2} 
+                  dot={{ r: 4, strokeWidth: 2, fill: localStorage.getItem('theme') === 'dark' ? '#1A2130' : '#fff' }} 
+                  activeDot={{ r: 6, fill: localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000' }} 
+                />
               </LineChart>
             </ResponsiveContainer>
           )}
