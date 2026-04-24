@@ -238,7 +238,7 @@ export default function Transactions() {
 
         {activeTab === 'transactions' && (
           <>
-            <div className="flex gap-2 mb-6 bg-white dark:bg-[#1A2130] p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+            <div className="flex gap-2 mb-6 bg-white dark:bg-dark-surface p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border">
                <div className="flex-1">
                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">From</label>
                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full text-sm font-semibold bg-transparent outline-none mt-1 dark:text-white dark:colorscheme-dark" />
@@ -299,7 +299,7 @@ export default function Transactions() {
                  <p className="text-center text-gray-500 text-sm py-10">No active recurring expenses.</p>
               ) : (
                  recurringExpenses.map(r => (
-                   <div key={r._id} className="bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                   <div key={r._id} className="bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex justify-between items-center">
                      <div>
                        <h3 className="font-bold text-sm">{r.description}</h3>
                        <p className="text-xs text-gray-500 capitalize">{r.frequency} • Next run: {new Date(r.nextRunDate).toLocaleDateString()}</p>
@@ -345,7 +345,7 @@ export default function Transactions() {
 
           {/* Sheet */}
           {/* Sheet */}
-          <div className="fixed bottom-0 left-0 right-0 z-[100] max-w-md mx-auto bg-[#0B101B] rounded-t-[2rem] p-6 shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto pb-32">
+          <div className="fixed bottom-0 left-0 right-0 z-[100] max-w-md mx-auto bg-dark p-6 rounded-t-[2rem] shadow-2xl animate-slide-up max-h-[92vh] overflow-y-auto pb-32 border-t border-dark-border">
             {/* Header */}
             {activeTab === 'recurring' ? (
               <div className="flex justify-between items-center mb-4">
@@ -354,7 +354,7 @@ export default function Transactions() {
               </div>
             ) : (
               <div className="flex justify-between items-center mb-4">
-                <div className="flex bg-[#1A2130] rounded-lg p-1">
+                <div className="flex bg-dark-input rounded-lg p-1">
                   <button onClick={() => setType('expense')} className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'expense' ? "bg-gray-700 text-white shadow" : "text-gray-400")}>Expense</button>
                   <button onClick={() => setType('income')} className={cn("px-3 py-1 text-xs font-medium rounded-md transition", type === 'income' ? "bg-green-600 text-white shadow" : "text-gray-400")}>Income</button>
                 </div>
@@ -362,26 +362,26 @@ export default function Transactions() {
               </div>
             )}
 
-            <div className="flex items-center text-gray-400 text-5xl font-semibold mb-6 border-b border-gray-800 pb-2">
+            <div className="flex items-center text-gray-400 text-5xl font-semibold mb-6 border-b border-dark-border pb-2">
               <span className="mr-2">{currency.symbol}</span>
               <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-transparent text-gray-500 outline-none w-full placeholder-gray-600 focus:text-white transition-colors" placeholder="0.00" />
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-[#1A2130] p-4 rounded-xl">
+              <div className="flex items-center gap-3 bg-dark-input p-4 rounded-xl border border-dark-border">
                 <Pencil size={18} className="text-gray-400" />
                 <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description (e.g., Netflix)" className="bg-transparent text-sm text-white outline-none w-full placeholder-gray-500" />
               </div>
 
               {activeTab === 'recurring' && (
                 <div className="flex gap-3">
-                  <select value={frequency} onChange={e => setFrequency(e.target.value)} className="flex-1 bg-[#1A2130] text-sm text-gray-200 outline-none p-4 rounded-xl">
+                  <select value={frequency} onChange={e => setFrequency(e.target.value)} className="flex-1 bg-dark-input text-sm text-gray-200 outline-none p-4 rounded-xl border border-dark-border">
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </select>
-                  <input type="date" value={nextRunDate} onChange={e => setNextRunDate(e.target.value)} className="flex-1 bg-[#1A2130] text-sm text-gray-200 outline-none p-4 rounded-xl" />
+                  <input type="date" value={nextRunDate} onChange={e => setNextRunDate(e.target.value)} className="flex-1 bg-dark-input text-sm text-gray-200 outline-none p-4 rounded-xl border border-dark-border" />
                 </div>
               )}
 
@@ -393,10 +393,10 @@ export default function Transactions() {
               )}
 
               {activeTab === 'transactions' && isSplit && type === 'expense' && (
-                <div className="bg-[#1A2130] p-4 rounded-xl space-y-3">
+                <div className="bg-dark-surface p-4 rounded-xl space-y-3 border border-dark-border">
                   <label className="text-xs font-semibold text-gray-400 block">Select Group (Optional)</label>
                   <div className="flex gap-2">
-                    <select className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors cursor-pointer"
+                    <select className="flex-1 border border-dark-border rounded-lg px-2 py-2 text-xs outline-none bg-dark-input text-white focus:border-primary transition-colors cursor-pointer"
                       onChange={(e) => {
                         if (e.target.value === "") return;
                         const group = groups.find(g => g._id === e.target.value) || savedGroups.find(g => g.name === e.target.value);
@@ -410,7 +410,7 @@ export default function Transactions() {
                       {savedGroups.map(g => <option key={g.name} value={g.name} className="bg-gray-800">{g.name}</option>)}
                       {groups.map(g => <option key={g._id} value={g._id} className="bg-gray-800">{g.name}</option>)}
                     </select>
-                    <select className="flex-1 border border-gray-700 rounded-lg px-2 py-2 text-xs outline-none bg-[#0B101B] text-white focus:border-primary transition-colors cursor-pointer"
+                    <select className="flex-1 border border-dark-border rounded-lg px-2 py-2 text-xs outline-none bg-dark-input text-white focus:border-primary transition-colors cursor-pointer"
                       onChange={(e) => {
                         if (e.target.value === "") return;
                         if (!participants.includes(e.target.value)) setParticipants([...participants, e.target.value]);
@@ -432,7 +432,7 @@ export default function Transactions() {
                       }} className="text-[10px] font-bold text-primary uppercase tracking-wider hover:text-blue-400 bg-blue-900/20 px-2 py-1 rounded-md">Save as Group</button>
                     )}
                   </div>
-                  <div className="flex items-center border border-gray-700 rounded-lg px-3 py-2 bg-[#0B101B] focus-within:border-primary">
+                  <div className="flex items-center border border-dark-border rounded-lg px-3 py-2 bg-dark-input focus-within:border-primary">
                     <input type="text" value={newParticipant} onChange={(e) => setNewParticipant(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter' && newParticipant.trim() && !participants.includes(newParticipant.trim())) { setParticipants([...participants, newParticipant.trim()]); setNewParticipant(''); } }}
                       placeholder="Or type a name... (Enter)" className="w-full text-sm outline-none bg-transparent text-white placeholder-gray-600" />
@@ -451,7 +451,7 @@ export default function Transactions() {
               )}
 
               <div className="flex gap-3">
-                <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary">
+                <div className="flex-1 relative bg-dark-input p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary border border-dark-border">
                   <select value={category} onChange={handleCategoryChange} className="w-full h-full absolute inset-0 opacity-0 cursor-pointer">
                     {currentCategories.map(cat => <option key={cat} value={cat} className="bg-[#0B101B]">{cat}</option>)}
                     <option value="ADD_NEW" className="bg-[#0B101B]">+ Add New...</option>
@@ -459,7 +459,7 @@ export default function Transactions() {
                   <span className="text-sm font-medium text-gray-200 truncate pr-2">{category}</span>
                   <ChevronDown size={18} className="text-gray-500 pointer-events-none flex-shrink-0" />
                 </div>
-                <div className="flex-1 relative bg-[#1A2130] p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary">
+                <div className="flex-1 relative bg-dark-input p-4 rounded-xl flex items-center justify-between focus-within:ring-1 focus-within:ring-primary border border-dark-border">
                   <select value={paymentMode} onChange={handlePaymentModeChange} className="w-full h-full absolute inset-0 opacity-0 cursor-pointer">
                     {paymentModes.map(mode => <option key={mode} value={mode} className="bg-[#0B101B]">{mode}</option>)}
                     <option value="ADD_NEW" className="bg-[#0B101B]">+ Add New...</option>
@@ -486,9 +486,9 @@ export default function Transactions() {
 
 function ExpenseItem({ icon: Icon, title, category, mode, amount, time, isIncome, isSplit, onDelete }) {
   return (
-    <div className="group flex items-center justify-between bg-white dark:bg-[#1A2130] p-4 rounded-2xl shadow-sm hover:shadow-md transition-all">
+    <div className="group flex items-center justify-between bg-white dark:bg-dark-surface p-4 rounded-2xl shadow-sm hover:shadow-md transition-all border border-transparent dark:border-dark-border">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 bg-gray-100 dark:bg-dark-input rounded-xl flex items-center justify-center flex-shrink-0">
           <Icon size={18} className="text-gray-700 dark:text-gray-300" />
         </div>
         <div>

@@ -12,7 +12,13 @@ export default {
           DEFAULT: '#0052FF',
           light: '#E5EDFF',
         },
-        dark: '#0B101B',
+        dark: {
+          DEFAULT: '#0B0C10',
+          bg: '#0B0C10',
+          surface: '#16181D',
+          border: '#2D3139',
+          input: '#1F2229'
+        },
         gray: {
           50: '#F8F9FA',
           100: '#F1F3F5',

@@ -58,7 +58,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-6 space-y-6 min-h-screen dark:bg-[#0B101B] pb-32">
+    <div className="p-6 space-y-6 min-h-screen dark:bg-dark pb-32">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm border border-gray-200 dark:border-gray-800">
@@ -83,7 +83,7 @@ export default function Profile() {
 
       <div>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-4">ACCOUNT & DATA</p>
-        <div className="bg-white dark:bg-[#1A2130] rounded-3xl shadow-sm overflow-hidden transition-colors">
+        <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-sm overflow-hidden transition-colors border border-transparent dark:border-dark-border">
           <SettingItem icon={User} title="Personal Information" subtitle="Update your details" hasArrow borderBottom cursor="pointer" onClick={() => setInfoOpen(true)} />
           <SettingItem 
             icon={Banknote} 
@@ -105,7 +105,7 @@ export default function Profile() {
 
       <div>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-4">PREFERENCES</p>
-        <div className="bg-white dark:bg-[#1A2130] rounded-3xl shadow-sm overflow-hidden transition-colors">
+        <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-sm overflow-hidden transition-colors border border-transparent dark:border-dark-border">
           <SettingItem 
             icon={Moon} 
             title="Dark Mode" 
@@ -125,7 +125,7 @@ export default function Profile() {
 
       <div>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 ml-4">PLANNING</p>
-        <div className="bg-white dark:bg-[#1A2130] rounded-3xl shadow-sm overflow-hidden transition-colors">
+        <div className="bg-white dark:bg-dark-surface rounded-3xl shadow-sm overflow-hidden transition-colors border border-transparent dark:border-dark-border">
           <SettingItem 
             icon={Activity} 
             title="Category Budgets" 
@@ -144,7 +144,7 @@ export default function Profile() {
       <div className="pt-2">
         <button 
           onClick={() => { logout(); navigate('/login'); }}
-          className="w-full bg-white dark:bg-[#1A2130] text-red-600 font-semibold py-4 rounded-3xl shadow-sm border-2 border-transparent hover:border-red-100 dark:hover:border-red-900 transition-colors"
+          className="w-full bg-white dark:bg-dark-surface text-red-600 font-semibold py-4 rounded-3xl shadow-sm border-2 border-transparent hover:border-red-100 dark:hover:border-red-900 transition-colors"
         >
           Log Out
         </button>
@@ -154,7 +154,7 @@ export default function Profile() {
       {infoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setInfoOpen(false)}></div>
-          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all">
+          <div className="bg-white dark:bg-dark-surface w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all border border-transparent dark:border-dark-border">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
               <h2 className="text-xl font-bold dark:text-white">Personal Info</h2>
               <button onClick={() => setInfoOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>
@@ -181,7 +181,7 @@ export default function Profile() {
       {budgetsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setBudgetsOpen(false)}></div>
-          <div className="bg-white dark:bg-[#1A2130] w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all flex flex-col max-h-[80vh]">
+          <div className="bg-white dark:bg-dark-surface w-full max-w-sm rounded-[2rem] shadow-2xl relative z-10 overflow-hidden transform transition-all flex flex-col max-h-[80vh] border border-transparent dark:border-dark-border">
             <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
               <h2 className="text-xl font-bold dark:text-white">Category Budgets</h2>
               <button onClick={() => setBudgetsOpen(false)} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-full"><X size={18} className="text-gray-600 dark:text-gray-300" /></button>

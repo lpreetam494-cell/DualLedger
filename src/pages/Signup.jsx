@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { Wallet } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -23,48 +23,46 @@ export default function Signup() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6">
-      <div className="flex flex-col items-center space-y-4 mb-8">
-        <div className="w-16 h-16 bg-gradient-to-tr from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-          <Wallet className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-600">
-          Join Dual Ledger
+      <div className="flex flex-col items-center space-y-4 mb-10">
+        <Logo className="w-20 h-20" color="#0052FF" />
+        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+          Join DualLedger
         </h1>
       </div>
-      <div className="w-full max-w-sm bg-white dark:bg-[#131B2B] p-6 rounded-2xl shadow-xl">
-        <h2 className="text-xl font-semibold mb-6 flex justify-center dark:text-white">Sign Up</h2>
-        {error && <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="w-full max-w-sm bg-white dark:bg-dark-surface p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-dark-border">
+        <h2 className="text-xl font-bold mb-8 flex justify-center dark:text-white">Create Account</h2>
+        {error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm border border-red-100 font-medium">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Full Name</label>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-500 dark:text-gray-400">Full Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#0B101B] border border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-              placeholder="Enter your name"
+              className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-dark-input border border-gray-200 dark:border-dark-border focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+              placeholder="Your name"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Email</label>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-500 dark:text-gray-400">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#0B101B] border border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-              placeholder="Enter your email"
+              className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-dark-input border border-gray-200 dark:border-dark-border focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+              placeholder="name@example.com"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">Password</label>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-gray-500 dark:text-gray-400">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#0B101B] border border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-              placeholder="Create a password"
+              className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-dark-input border border-gray-200 dark:border-dark-border focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all dark:text-white"
+              placeholder="Min. 6 characters"
               required
               minLength="6"
             />
@@ -72,9 +70,9 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-600 text-white font-semibold shadow-lg hover:opacity-90 transition-opacity"
+            className="w-full py-4 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-blue-600 transition-all active:scale-[0.98]"
           >
-            {loading ? 'Signing Up...' : 'Sign Up'}
+            {loading ? 'Creating Account...' : 'Get Started'}
           </button>
         </form>
         <div className="mt-6 text-center text-sm text-gray-500">

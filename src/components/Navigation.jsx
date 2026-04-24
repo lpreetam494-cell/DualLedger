@@ -19,7 +19,7 @@ const navItems = [
 
 export default function Navigation() {
   return (
-    <div className="fixed bottom-0 w-full max-w-md bg-white dark:bg-[#1A2130] border-t border-gray-100 dark:border-gray-800 flex justify-between items-center px-6 py-3 pb-8 z-50 transition-colors">
+    <div className="fixed bottom-0 w-full max-w-md bg-white dark:bg-dark-surface border-t border-gray-100 dark:border-dark-border flex justify-between items-center px-6 py-3 pb-8 z-50 transition-colors">
       {navItems.map((item) => (
         <NavLink
           key={item.path}

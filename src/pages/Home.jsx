@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, Utensils, CarFront, ShoppingBag, Home as HomeIcon, Building2, Layers } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { useStore } from '../store/useStore';
+import Logo from '../components/Logo';
 
 const currencies = [
   { label: 'USD', symbol: '$' },
@@ -57,11 +58,9 @@ export default function Home() {
   return (
     <div className="p-6 space-y-6 pb-32">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-          </div>
-        <h1 className="text-xl font-bold dark:text-white">DualLedger</h1>
+        <div className="flex items-center gap-2">
+          <Logo className="w-8 h-8" color="#0052FF" />
+          <h1 className="text-xl font-extrabold tracking-tight dark:text-white">DualLedger</h1>
         </div>
         <div className="flex items-center gap-2">
           <select 
@@ -70,17 +69,17 @@ export default function Home() {
               const selected = currencies.find(c => c.label === e.target.value);
               if (selected) setCurrency(selected);
             }}
-            className="bg-gray-100 dark:bg-gray-800 text-xs font-semibold px-2 py-1.5 rounded-lg outline-none cursor-pointer dark:text-white border-r-4 border-transparent"
+            className="bg-gray-100 dark:bg-dark-surface text-xs font-semibold px-2 py-1.5 rounded-lg outline-none cursor-pointer dark:text-white border-r-4 border-transparent"
           >
             {currencies.map(c => <option key={c.label} value={c.label}>{c.label} ({c.symbol})</option>)}
           </select>
-          <button onClick={toggleNotifications} className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-sm">
+          <button onClick={toggleNotifications} className="p-2 bg-white dark:bg-dark-surface rounded-full shadow-sm border border-transparent dark:border-dark-border">
             <Bell size={20} className="text-gray-800 dark:text-white" />
           </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-[2rem] shadow-soft">
+      <div className="bg-white dark:bg-dark-surface p-6 rounded-[2rem] shadow-soft border border-transparent dark:border-dark-border">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Balance</p>
         <h2 className="text-4xl font-extrabold tracking-tight mb-6 dark:text-white">{currency.symbol}{currentBalance.toFixed(2)}</h2>
         <div className="flex gap-3">
@@ -100,7 +99,7 @@ export default function Home() {
       </div>
 
       <div className="flex gap-4">
-        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-[2rem]">
+        <div className="flex-1 bg-gray-100 dark:bg-dark-surface p-5 rounded-[2rem] border border-transparent dark:border-dark-border">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Monthly Spending</p>
           <div className="flex items-baseline gap-2 mb-4">
             <h3 className="text-xl font-bold dark:text-white">{currency.symbol}{totalSpent.toFixed(2)}</h3>
@@ -112,14 +111,14 @@ export default function Home() {
           <p className="text-[10px] text-gray-500 text-right">{totalBudget > 0 ? `${spendingPercentage.toFixed(0)}% used` : 'Current cycle'}</p>
         </div>
 
-        <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-5 rounded-[2rem]">
+        <div className="flex-1 bg-gray-100 dark:bg-dark-surface p-5 rounded-[2rem] border border-transparent dark:border-dark-border">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Income</p>
           <h3 className="text-xl font-bold mb-2 dark:text-white">{currency.symbol}{totalIncome.toFixed(2)}</h3>
           <p className="text-[10px] text-gray-500">Current cycle</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#1A2130] p-6 rounded-3xl shadow-soft">
+      <div className="bg-white dark:bg-dark-surface p-6 rounded-3xl shadow-soft border border-transparent dark:border-dark-border">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h3 className="font-bold dark:text-white">Spending Trends</h3>
@@ -137,7 +136,7 @@ export default function Home() {
                   dataKey="value" 
                   stroke={localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000'} 
                   strokeWidth={2} 
-                  dot={{ r: 4, strokeWidth: 2, fill: localStorage.getItem('theme') === 'dark' ? '#1A2130' : '#fff' }} 
+                  dot={{ r: 4, strokeWidth: 2, fill: localStorage.getItem('theme') === 'dark' ? '#16181D' : '#fff' }} 
                   activeDot={{ r: 6, fill: localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000' }} 
                 />
               </LineChart>
@@ -172,7 +171,7 @@ function CategoryItem({ icon: Icon, title, subtitle, amount }) {
   return (
     <div className="flex items-center justify-between p-2">
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+        <div className="w-12 h-12 bg-gray-100 dark:bg-dark-surface rounded-2xl flex items-center justify-center border border-transparent dark:border-dark-border">
           <Icon size={20} className="text-gray-800 dark:text-gray-200" />
         </div>
         <div>
