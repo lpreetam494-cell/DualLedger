@@ -20,7 +20,10 @@ function LogoIcon({ className, color }) {
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
+      role="img"
+      aria-labelledby="logoTitle"
     >
+      <title id="logoTitle">DualLedger Logo</title>
       {/* Subtle background container */}
       <rect width="100" height="100" rx="24" fill={color} fillOpacity="0.08" />
       

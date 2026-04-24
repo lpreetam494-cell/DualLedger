@@ -134,10 +134,10 @@ export default function Home() {
                 <Line 
                   type="monotone" 
                   dataKey="value" 
-                  stroke={localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000'} 
+                  stroke={localStorage.getItem('theme') === 'dark' ? '#0052FF' : '#000'} 
                   strokeWidth={2} 
                   dot={{ r: 4, strokeWidth: 2, fill: localStorage.getItem('theme') === 'dark' ? '#16181D' : '#fff' }} 
-                  activeDot={{ r: 6, fill: localStorage.getItem('theme') === 'dark' ? '#60A5FA' : '#000' }} 
+                  activeDot={{ r: 6, fill: localStorage.getItem('theme') === 'dark' ? '#0052FF' : '#000' }} 
                 />
               </LineChart>
             </ResponsiveContainer>
