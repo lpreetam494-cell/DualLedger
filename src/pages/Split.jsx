@@ -127,12 +127,20 @@ export default function Split() {
             <p className="text-sm text-gray-400">All debts are settled!</p>
           ) : (
             <div className="space-y-3">
-              {settlements.map((s, idx) => (
-                <div key={idx} className="flex justify-between items-center border-b border-gray-800 pb-2">
-                  <span className="text-sm">{s.from === user?._id ? 'You' : s.from} pays {s.to === user?._id ? 'You' : s.to}</span>
-                  <span className="font-bold">{currency.symbol}{s.amount.toFixed(2)}</span>
-                </div>
-              ))}
+              {settlements.map((s, idx) => {
+                const isFromYou = s.fromId === user?._id || s.from === user?.name;
+                const isToYou = s.toId === user?._id || s.to === user?.name;
+                const fromText = isFromYou ? 'You' : s.from;
+                const toText = isToYou ? 'you' : s.to;
+                const verb = isFromYou ? 'pay' : 'pays';
+                
+                return (
+                  <div key={idx} className="flex justify-between items-center border-b border-gray-800 pb-2">
+                    <span className="text-sm">{fromText} {verb} {toText}</span>
+                    <span className="font-bold">{currency.symbol}{s.amount.toFixed(2)}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

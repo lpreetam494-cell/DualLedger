@@ -90,6 +90,8 @@ export const getSplitBalances = async (req, res) => {
     });
 
     const settlementsWithNames = settlements.map(s => ({
+      fromId: s.from,
+      toId: s.to,
       from: userMap[s.from] || s.from,
       to: userMap[s.to] || s.to,
       amount: s.amount

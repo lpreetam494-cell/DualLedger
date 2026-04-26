@@ -1,4 +1,6 @@
 import Expense from '../models/Expense.js';
+import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 // @desc    Get all expenses for the current user
 // @route   GET /api/expenses
@@ -44,6 +46,30 @@ export const addExpense = async (req, res) => {
     });
 
     const createdExpense = await expense.save();
+
+    if (isSplit && splitDetails && splitDetails.length > 0) {
+      const participantNames = splitDetails.map(s => s.userId);
+      const users = await User.find({ name: { $in: participantNames } });
+      const notifications = [];
+
+      splitDetails.forEach(split => {
+        const user = users.find(u => u.name === split.userId);
+        if (user) {
+          notifications.push({
+            userId: user._id,
+            type: 'expense_added',
+            message: `${req.user.name} added a split expense for '${description}'. You owe $${split.amountOwed.toFixed(2)}.`,
+            relatedId: createdExpense._id,
+            relatedModel: 'Expense'
+          });
+        }
+      });
+
+      if (notifications.length > 0) {
+        await Notification.insertMany(notifications);
+      }
+    }
+
     res.status(201).json(createdExpense);
   } catch (error) {
     res.status(400).json({ message: 'Invalid data', error: error.message });
